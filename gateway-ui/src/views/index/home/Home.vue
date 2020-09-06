@@ -1,8 +1,8 @@
 <!--
  * @Author: 吴文周
  * @Date: 2020-04-12 16:16:34
- * @LastEditTime: 2020-09-04 09:40:04
- * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-06 19:34:30
+ * @LastEditors: pym
  * @Description: 首页模块
  * @FilePath: /workespacemanger/src/views/home/Home.vue
  -->
@@ -17,21 +17,33 @@
     <div class="row chartRow">
       <div class="chartBox">
         <div class="realChart">
+          <el-row :gutter="20" class='titleRow'>
+            <el-col :span='20' class='title'>
+              日常请求记录
+            </el-col>
+            <el-col :span='4'>
+              <el-select v-model="serviceType">
+                <el-option label='全部' value='all'></el-option>
+                <el-option label='服务一' value='serviceFirst'></el-option>
+              </el-select>
+            </el-col>
+          </el-row>
           <!--折线图组件-->
-          <linesChart :chartData ='chartData'></linesChart>
+          <barLinesChart :chartData ='chartData'></barLinesChart>
         </div>
       </div>
       <div class="rightRow">
         <div class="realRight">
           <div class="weather">
             <div class="realWeather">
-              <!--天气组件-->
-              <weather></weather>
+              <!--播报状态组件-->
+              <weather :systemStatus='systemStatus'></weather>
             </div>
           </div>
           <div class="advertisement rowBox">
             <!--轮播图广告招租组件-->
-            <carousel :carouselList="carouselList"></carousel>
+            <carousel :carouselList="carouselList" v-if='carouselList.length > 0'></carousel>
+            <div v-else class='noData'>暂无异常</div>
           </div>
         </div>
       </div>

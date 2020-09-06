@@ -3,65 +3,56 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-21 22:21:31
- * @LastEditors: 吴文周
- * @LastEditTime: 2020-05-13 15:57:29
+ * @LastEditors: pym
+ * @LastEditTime: 2020-09-06 21:38:13
  */
 import request from '@/utils/request'
 
-export function getProjectSum(params) {
+export function getServiceSum() {
   return request({
-    url: '/api/getProjectSum',
+    url: '/uiApi/v1/service/serviceSum',
+    method: 'GET'
+  })
+}
+export function getServiceList(params) {
+  return request({
+    url: '/uiApi/v1/service/serviceList',
     method: 'GET',
     params: params
   })
 }
-export function getProjectList(params) {
+export function getServiceType() {
   return request({
-    url: '/api/getProjectList',
+    url: '/uiApi/v1/eumn/serverTypeList',
     method: 'GET',
-    params: params
   })
 }
-export function getProjectType(params) {
+export function addService(params) {
   return request({
-    url: '/api/getProjectType',
-    method: 'GET',
-    params: params
-  })
-}
-export function addProject(params) {
-  return request({
-    url: '/api/initNewProject',
+    url: '/uiApi/v1/service/addService',
     method: 'POST',
     params: params
   })
 }
-export function getTemList(params) {
+export function serviceDetail(id) {
   return request({
-    url: '/api/template/queryTemplateList',
-    method: 'GET',
-    params: params
+    url: '/uiApi/v1/service/serviceDetail/{'+id+'}',
+    method: 'GET'
   })
 }
-export function deleteProject(params) {
+export function updateService(params) {
   return request({
-    url: '/api/project/deleteProject',
+    url: '/uiApi/v1/service/editService',
     method: 'POST',
     params: params
   })
 }
-export function updateProject(params) {
+export function deleteService(params) {
   return request({
-    url: '/api/project/updateProject',
+    url: '/uiApi/v1/service/deleteService',
     method: 'POST',
     params: params
   })
 }
-export function action(params) {
-  return request({
-    url: '/api/project/action',
-    method: 'POST',
-    params: params
-  })
-}
+
 

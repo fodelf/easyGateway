@@ -4,7 +4,7 @@
  * @Github: https://github.com/fodelf
  * @Date: 2019-08-14 19:09:48
  * @LastEditors: pym
- * @LastEditTime: 2020-04-04 16:58:51
+ * @LastEditTime: 2020-09-06 18:51:00
  */
 import axios from 'axios'
 import { Message } from 'element-ui'
@@ -57,9 +57,9 @@ axios.interceptors.response.use(
     // console.log('data')
     // console.log(res)
     // if the custom code is not 000000, it is judged as an error.
-    if (res.resultCode !== 200) {
+    if (res.code !== 200) {
       Message({
-        message: res.resultMes || '出错啦！',
+        message: res.msg || '出错啦！',
         type: 'error',
         duration: 5 * 1000,
         showClose: true
@@ -78,7 +78,7 @@ axios.interceptors.response.use(
       //     // })
       //   })
       // }
-      return Promise.reject(res.resultMes || 'error')
+      return Promise.reject(res.msg || 'error')
     } else {
       return res
     }
@@ -115,7 +115,7 @@ export default function request(args) {
       return new Promise((resolve, reject) => {
         axios.post(url, params).then(
           res => {
-            let data = res.resultEntity ? res.resultEntity : {}
+            let data = res.data ? res.data : {}
             resolve(data)
           },
           err => {
@@ -130,7 +130,7 @@ export default function request(args) {
             params: params ? params : ''
           })
           .then(res => {
-            let data = res.resultEntity ? res.resultEntity : {}
+            let data = res.data ? res.data : {}
             resolve(data)
           })
           .catch(err => {

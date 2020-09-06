@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: http://gitlab.yzf.net/wuwenzhou
  * @Date: 2019-11-19 08:46:03
- * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-04 17:09:46
+ * @LastEditors: pym
+ * @LastEditTime: 2020-09-06 18:40:52
  */
 const path = require('path')
 const ispro = process.env.NODE_ENV !== 'development'
@@ -35,8 +35,8 @@ module.exports = {
   devServer: {
     port:9527,
     proxy: {
-      '/api': {
-        target: 'http://localhost:9526'
+      '/uiApi': {
+        target: 'http://192.168.0.105:9523'
       },
       '/socket.io': {
         target: 'http://localhost:9526',

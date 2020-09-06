@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-21 21:41:04
- * @LastEditors: 吴文周
- * @LastEditTime: 2020-05-06 20:10:29
+ * @LastEditors: pym
+ * @LastEditTime: 2020-09-06 20:10:04
  -->
 <template>
   <div class="tableBox" ref="tableBox">
@@ -20,6 +20,9 @@
       </el-table-column>
       <el-table-column label="操作" width="250">
         <template slot-scope="scope">
+           <el-button type="primary" @click="handleCheck(scope.row)"
+            >查看</el-button
+          >
           <el-button type="primary" @click="handleEdit(scope.row)"
             >编辑</el-button
           >
@@ -32,7 +35,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <div class="pageBox clearfix">
+    <!-- <div class="pageBox clearfix">
       <el-pagination
         background
         @current-change="handleCurrentChange"
@@ -42,7 +45,7 @@
         :total="tablePag.totalRecord"
       >
       </el-pagination>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -86,6 +89,9 @@ export default {
     handleCurrentChange(val) {
       this.$emit('changePageNo', val)
     },
+    handleCheck(row){
+      this.$emit('checkRow', row)
+    },
     handleEdit(row) {
       this.$emit('editRow', row)
     },
@@ -97,7 +103,7 @@ export default {
     },
     setTableHeight() {
       this.$nextTick(() => {
-        this.tableHeight = this.$refs.tableBox.offsetHeight - 40
+        this.tableHeight = this.$refs.tableBox.offsetHeight
       })
     },
     doLay() {

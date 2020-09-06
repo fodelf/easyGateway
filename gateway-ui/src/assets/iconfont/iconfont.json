@@ -6,6 +6,41 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "9097121",
+      "name": "天气",
+      "font_class": "ziyuan1",
+      "unicode": "e643",
+      "unicode_decimal": 58947
+    },
+    {
+      "icon_id": "970780",
+      "name": "太阳",
+      "font_class": "taiyang-copy",
+      "unicode": "e64c",
+      "unicode_decimal": 58956
+    },
+    {
+      "icon_id": "3998076",
+      "name": "浏览",
+      "font_class": "liulan",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "8351283",
+      "name": "删 除",
+      "font_class": "shanchu",
+      "unicode": "e653",
+      "unicode_decimal": 58963
+    },
+    {
+      "icon_id": "13691914",
+      "name": "编 辑",
+      "font_class": "bianji1",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
       "icon_id": "10233453",
       "name": "没有订单",
       "font_class": "meiyoudingdan",

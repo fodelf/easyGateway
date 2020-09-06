@@ -1,3 +1,11 @@
+<!--
+ * @Descripttion: 
+ * @version: 
+ * @Author: pym
+ * @Date: 2020-09-06 15:27:04
+ * @LastEditors: pym
+ * @LastEditTime: 2020-09-06 19:54:50
+-->
 <template>
   <div class="projectManage">
     <div class="leftMenu">
@@ -16,20 +24,18 @@
         ></el-input>
       </p>
       <!--表格组件-->
-      <!-- <div class="tableCon">
+      <div class="tableCon">
         <tableBox
           ref="table"
-          :tablePag="tablePag"
           :dataList="dataList"
           :headerList="headerList"
           :actionType ="'project'"
           @editRow="editRow"
           @deleteRow="deleteRow"
-          @changePageNo="getPageNo"
-          @newBranch ='newBranch'
+          @checkRow="checkRow"
         ></tableBox>
-      </div> -->
-      <div class="tableCon">
+      </div>
+      <!-- <div class="tableCon">
         <compCard
             :compCardList="dataList"
             @edit="editRow"
@@ -39,7 +45,7 @@
             @changePageNo="getPageNo"
             @action ="action"
           ></compCard>
-      </div>
+      </div> -->
     </div>
     <!--弹窗组件-->
     <proDialog

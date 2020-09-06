@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-21 21:17:29
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2020-04-28 09:18:57
+ * @LastEditors: pym
+ * @LastEditTime: 2020-09-06 20:00:19
  -->
 <template>
   <div class="menuList">
@@ -23,11 +23,11 @@
         <span>{{ item.label }}</span>
         <i>{{ item.count }}</i>
       </li>
-      <li>
+      <!-- <li>
         <el-button type="primary" @click="addMenu" icon="el-icon-plus"
           >新增</el-button
         >
-      </li>
+      </li> -->
     </ul>
   </div>
 </template>

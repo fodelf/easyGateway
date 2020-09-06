@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-08-18 11:02:53
  * @LastEditors: pym
- * @LastEditTime: 2020-08-18 16:04:06
+ * @LastEditTime: 2020-09-06 21:19:40
 -->
 <template>
   <el-card class="box-card">
@@ -14,15 +14,15 @@
     </div>
     <el-form label-width='100px' label-position="left">
       <el-form-item label='ip'>
-        {{item.ip}}
+        {{item.address}}
       </el-form-item>
       <el-form-item label='端口号'>
-        {{item.host}}
+        {{item.port}}
       </el-form-item>
-      <el-form-item label='用户名'>
+      <el-form-item label='用户名' v-if="item.type === 'rabbitMq'">
         {{item.userName}}
       </el-form-item>
-      <el-form-item label='密码'>
+      <el-form-item label='密码' v-if="item.type === 'rabbitMq'">
         {{item.password}}
       </el-form-item>
     </el-form>

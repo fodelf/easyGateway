@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-21 20:50:26
- * @LastEditors: 吴文周
- * @LastEditTime: 2020-05-15 16:55:58
+ * @LastEditors: pym
+ * @LastEditTime: 2020-09-06 19:33:25
  -->
 <template>
   <el-carousel
@@ -14,12 +14,12 @@
     arrow="nerver"
   >
     <el-carousel-item v-for="item in carouselList" :key="item">
-      <p class="desc">我想说点啥</p>
+      <p class="desc">{{item}}</p>
       <div class="actor">
         <i class="user-bg"></i>
         <div class="user">
           <p class="user-name">wwz</p>
-          <p>Actor</p>
+          <p>负责人</p>
         </div>
       </div>
     </el-carousel-item>

@@ -3,8 +3,8 @@
  * @version: 
  * @Author: pym
  * @Date: 2020-08-11 10:20:11
- * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-04 09:37:24
+ * @LastEditors: pym
+ * @LastEditTime: 2020-09-06 21:48:00
  */
 const menuTree = [
   { name: 'home', path: '/home', icon: 'icon-shouye', label: '首页' },
@@ -15,17 +15,10 @@ const menuTree = [
     label: '服务管理'
   },
   {
-    name: 'systemManage',
-    path: '/system/userManage',
+    name: 'serviceSet',
+    path: '/system/serviceSet',
     icon: 'icon-shezhi',
-    label: '系统设置',
-    children:[
-      {
-        name: 'serviceSet',
-        path: '/system/serviceSet',
-        label: '服务设置'
-      }
-    ]
+    label: '系统设置'
   }
 ]
 

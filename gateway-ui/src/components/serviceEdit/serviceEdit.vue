@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-08-18 15:06:40
  * @LastEditors: pym
- * @LastEditTime: 2020-08-18 16:05:33
+ * @LastEditTime: 2020-09-06 21:19:47
 -->
 <template>
   <el-dialog
@@ -17,17 +17,17 @@
   >
     <el-form :model='serviceForm' 
       label-width="100px"
-      label-position="left">
-      <el-form-item label='ip'>
-        <el-input type='text' v-model='serviceForm.ip'></el-input>
+      label-position="left" :rules="rules">
+      <el-form-item label='ip' prop="address">
+        <el-input type='text' v-model='serviceForm.address'></el-input>
       </el-form-item>
       <el-form-item label='端口号'>
-        <el-input type='text' v-model='serviceForm.host'></el-input>
+        <el-input type='text' v-model='serviceForm.port'></el-input>
       </el-form-item>
-      <el-form-item label='用户名'>
+      <el-form-item label='用户名' v-if='serviceForm.type === "rabbitMq"'>
         <el-input type='text' v-model='serviceForm.userName'></el-input>
       </el-form-item>
-       <el-form-item label='密码'>
+       <el-form-item label='密码' v-if='serviceForm.type === "rabbitMq"'>
         <el-input type='password' v-model='serviceForm.password'></el-input>
       </el-form-item>
       <el-row type="flex" justify="end">
@@ -46,18 +46,24 @@ export default {
   data() {
     return {
       serviceVisible:false,
-      serviceForm:{}
+      serviceForm:{},
+      rules:{
+        address:[
+          {required:true,message:'请输入ip',trigger:'blur'}
+        ]
+      }
     }
   },
   methods:{
     close() {
       this.serviceVisible = false
     },
-    show() {
+    show(form) {
       this.serviceVisible = true
+      this.serviceForm = JSON.parse(JSON.stringify(form))
     },
     confirm() {
-      
+      this.$emit('confirmService',this.serviceForm)
     }
   }
 }

@@ -3,20 +3,21 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:55:11
- * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-04 10:30:59
+ * @LastEditors: pym
+ * @LastEditTime: 2020-09-06 19:36:36
  */
 import cardNum from '@/components/cardNum/cardNum'
 import carousel from '@/components/carousel/carousel.vue'
 import actionModule from '@/components/actionModule/actionModule.vue'
-import linesChart from '@/components/linesChart/LinesChart'
+import barLinesChart from '@/components/barLinesChart/BarLinesChart'
 import weather from '@/components/weather/weather.vue'
-import { getIndexCount, getTodoList, insertTask ,queryIndexTrend,changeTodoList} from '@/api/home.js'
+import { getIndexCount, queryIndexTrend, queryActualTime, queryWarningList} from '@/api/home.js'
 export default {
   name: 'home',
   data() {
     return {
       chartData:null,
+      serviceType:'',
       cardList: [
         {
           icon: 'icon-xiangmu',
@@ -24,7 +25,7 @@ export default {
           num: 3,
           percent: '50%',
           proColor: '#fb9678',
-          key: 'projectCount'
+          key: 'serverSum'
         },
         {
           icon: 'icon-mobanguanli1',
@@ -32,7 +33,7 @@ export default {
           num: 1200,
           percent: '60%',
           proColor: '#01c0c8',
-          key: 'templateCount'
+          key: 'warningSum'
         },
         {
           icon: 'icon-mobanguanli',
@@ -40,7 +41,7 @@ export default {
           num: 789,
           percent: '70%',
           proColor: '#ab8ce4',
-          key: 'componentCount'
+          key: 'requestSum'
         },
         {
           icon: 'icon-gongju',
@@ -48,10 +49,11 @@ export default {
           num: 234,
           percent: '80%',
           proColor: '#00c292',
-          key: 'scriptCount'
+          key: 'failSum'
         }
       ],
-      carouselList: [1, 2, 3, 4],
+      systemStatus:{},
+      carouselList: [],
       todoList: [],
       personalObj: {
         msgTit: '个人动态',
@@ -116,7 +118,7 @@ export default {
     cardNum,
     carousel,
     actionModule,
-    linesChart,
+    barLinesChart,
     weather
   },
   methods: {
@@ -127,7 +129,9 @@ export default {
      * @return {type}: 默认类型
      */
     queryIndexCount() {
+      console.log('0000')
       getIndexCount().then(res => {
+        console.log('2222')
         console.log(res)
         this.cardList.map(item => {
           return (item.num = res[item.key] || 0)
@@ -135,18 +139,18 @@ export default {
       })
     },
     queryChart() {
-      queryIndexTrend().then(res => {
+      queryIndexTrend(0).then(res => {
         this.chartData = res
       })
     },
-    getTodoList(){
-      getTodoList({}).then((res)=>{
-        this.todoList = res
+    getActualTime() {
+      queryActualTime().then(res=>{
+        this.systemStatus = res
       })
     },
-    changeTodoList(item){
-      changeTodoList(item).then(()=>{
-        // this.todoList = res
+    getWarningList() {
+      queryWarningList().then(res=>{
+        this.carouselList = res.warningList || []
       })
     }
   },
@@ -162,6 +166,7 @@ export default {
   created() {
     this.queryIndexCount()
     this.queryChart()
-    this.getTodoList()
+    this.getActualTime()
+    this.getWarningList()
   }
 }

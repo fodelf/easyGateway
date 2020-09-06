@@ -15,6 +15,11 @@
       border-right: 1px solid #4f5467;
     }
   }
+  /deep/.el-input__inner {
+    background-color: #303641;
+    border: none;
+    color: #ced4da;
+  }
   .row {
     display: flex;
     flex-wrap: wrap;
@@ -31,6 +36,14 @@
         width: 100%;
         height: 100%;
         background: #353c48;
+        // padding:10px;
+        .titleRow {
+          padding:10px;
+        }
+        .title {
+          color:#ced4da;
+          line-height:40px;
+        }
       }
     }
     .rightRow {
@@ -48,6 +61,15 @@
           flex: 0 0 50%;
           width: 100%;
           background: #353c48;
+          .noData {
+            width:100%;
+            height:100%;
+            display:flex;
+            justify-content: center;
+            align-items:center;
+            color:#fff;
+            background: #fb9678;
+          }
         }
         .weather {
           flex: 0 0 50%;

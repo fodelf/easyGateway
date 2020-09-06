@@ -4,18 +4,26 @@
  * @Github: https://github.com/fodelf
  * @Date: 2020-04-06 16:39:24
  * @LastEditors: pym
- * @LastEditTime: 2020-04-06 17:40:17
+ * @LastEditTime: 2020-09-06 19:48:37
  -->
 <template>
   <div class="weather">
     <div class="temperature">
-      <span class="weatherAir">36<sup>°C</sup></span>
-      <div class="location">NANJING,CHINA</div>
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item>总数</el-breadcrumb-item>
+        <el-breadcrumb-item>正常</el-breadcrumb-item>
+        <el-breadcrumb-item>错误</el-breadcrumb-item>
+      </el-breadcrumb>
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item>{{systemStatus.dataSum.total}}</el-breadcrumb-item>
+        <el-breadcrumb-item class='success-item'>{{systemStatus.dataSum.success}}</el-breadcrumb-item>
+        <el-breadcrumb-item class='fail-item'>{{systemStatus.dataSum.fail}}</el-breadcrumb-item>
+      </el-breadcrumb>
     </div>
+    <p class='title'>系统状态{{systemStatus.todayState==='good' ? '优': systemStatus.todayState==='normal' ? '中等' : '差'}}</p>
     <div class="weatherBg">
-      <div class="iconfont icon-ziyuan"></div>
-      <div class="weatherDec">SUNNEY DAY</div>
-      <div class="weatherDate">Aprial 6</div>
+      <div class="iconfont" :class="systemStatus.todayState==='good' ? 'icon-taiyang-copy': systemStatus.todayState==='normal' ? 'icon-ziyuan' : 'icon-ziyuan1'"></div>
+      <div class="weatherDate">{{systemStatus.realTime}}</div>
     </div>
   </div>
 </template>
@@ -23,10 +31,14 @@
 <script>
 export default {
   name: 'weather',
+  props:['systemStatus'],
   data() {
     return {}
   },
   methods: {},
+  created() {
+    
+  }
 }
 </script>
 
@@ -43,19 +55,37 @@ export default {
     width: 50%;
     position: absolute;
     left: 20px;
-    bottom: 30px;
-
-    .weatherAir {
-      font-size: 60px;
-      sup {
-        font-size: 30px;
+    bottom: 10px;
+    color: #fff;
+    /deep/.el-breadcrumb {
+      margin-bottom:8px;
+      .el-breadcrumb__item {
+        .el-breadcrumb__inner {
+          color:#fff;
+        }
+      }
+      .success-item {
+        .el-breadcrumb__inner {
+           color:green;
+        }
+      }
+      .fail-item {
+        .el-breadcrumb__inner {
+           color:red;
+        }
       }
     }
-    .location {
-      font-size: 14px;
-    }
-
-    color: #fff;
+  }
+  .title {
+    position:absolute;
+    left:50%;
+    top:50%;
+    margin-top:-20px;
+    margin-left:-60px;
+    height:40px;
+    width:120px;
+    color:#fff;
+    font-size:20px;
   }
   .weatherBg {
     flex: 0 0 50%;

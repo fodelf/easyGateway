@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2019-06-05 18:57:53
- * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-04 10:16:36
+ * @LastEditors: pym
+ * @LastEditTime: 2020-09-06 21:47:43
  */
 import Vue from 'vue'
 import Router from 'vue-router'
@@ -13,8 +13,9 @@ const Home = () => import('@/views/index/home/Home.vue')
 const ProjectManage = () => import('@/views/index/projectManage/projectManage.vue')
 const ProjectInit = () =>
   import('@/views/index/projectManage/projectInit/ProjectInit.vue')
-import userManage from '@/views/index/systemManage/userManage/userManage.vue'
+const ProjectAdd = () =>  import('@/views/index/projectManage/projectAdd/projectAdd.vue')
 import serviceSet from '@/views/index/systemManage/serviceSet/serviceSet.vue'
+
 // const TerminalView = () => import('components/terminal/TerminalView.vue')
 Vue.use(Router)
 const vueRouter = new Router({
@@ -58,26 +59,26 @@ const vueRouter = new Router({
           meta: {
             title: '服务初始化'
           }
+        },
+        {
+          path: 'projectAdd',
+          component: ProjectAdd,
+          name: 'projectAdd',
+          meta: {
+            title: '新增服务'
+          }
         }
       ]
     },
     {
       path: '/system',
       name: 'system',
-      redirect: '/system/userManage',
+      redirect: '/system/serviceSet',
       component: MainLayout,
       meta: {
         title: '系统设置'
       },
       children: [
-        {
-          path: 'userManage',
-          component: userManage,
-          name: 'userManage',
-          meta: {
-            title: '用户管理'
-          }
-        },
         {
           path: 'serviceSet',
           component: serviceSet,
