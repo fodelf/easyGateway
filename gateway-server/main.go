@@ -7,9 +7,6 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 )
-
-//  "time"
-
 func main() {
 	setting.Setup()
 	// ConnectDB()

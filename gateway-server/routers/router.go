@@ -3,9 +3,9 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 
-	_ "github.com/EDDYCJY/go-gin-example/docs"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
+	_ "gateway/docs"
+	swaggerFiles "github.com/swaggo/files"
+    ginSwagger "github.com/swaggo/gin-swagger"
 
 	v1 "gateway/routers/api/v1"
 )
@@ -21,36 +21,51 @@ func InitRouter() *gin.Engine {
 	r.Static("/static", "web/static")     // 添加资源路径
 	r.StaticFile("/ui", "web/index.html") // 前端接口
 
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	apiv1 := r.Group("/uiApi/v1")
+    r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	apiRoot := r.Group("/uiApi/v1")
+	apiRoot.Use()
+	// 总览部分
+	indexApi := apiRoot.Group("/index")
 	{
-		//获取标签列表
-		apiv1.GET("/tags", v1.GetTags)
-		// //新建标签
-		// apiv1.POST("/tags", v1.AddTag)
-		// //更新指定标签
-		// apiv1.PUT("/tags/:id", v1.EditTag)
-		// //删除指定标签
-		// apiv1.DELETE("/tags/:id", v1.DeleteTag)
-		// //导出标签
-		// r.POST("/tags/export", v1.ExportTag)
-		// //导入标签
-		// r.POST("/tags/import", v1.ImportTag)
-
-		// //获取文章列表
-		// apiv1.GET("/articles", v1.GetArticles)
-		// //获取指定文章
-		// apiv1.GET("/articles/:id", v1.GetArticle)
-		// //新建文章
-		// apiv1.POST("/articles", v1.AddArticle)
-		// //更新指定文章
-		// apiv1.PUT("/articles/:id", v1.EditArticle)
-		// //删除指定文章
-		// apiv1.DELETE("/articles/:id", v1.DeleteArticle)
-		// //生成文章海报
-		// apiv1.POST("/articles/poster/generate", v1.GenerateArticlePoster)
+	  //获取首页汇总	
+	  indexApi.GET("/sum", v1.GetSum)
+	  //获取图表信息
+	  indexApi.GET("/charts/:id", v1.GetCharts)
+      //实时状态查询
+	  indexApi.GET("/actualTime", v1.GetActualTime)
+	  //实时状态查询
+	  indexApi.GET("/warningList", v1.GetWarningList)
 	}
-
+	eumnApi := apiRoot.Group("/eumn")
+	{
+	  //服务类型
+	  eumnApi.GET("/serverTypeList", v1.GetServerType)
+	}
+	// 服务部分
+	serviceApi := apiRoot.Group("/service")
+	{
+	  //获取服务汇总	
+	  serviceApi.GET("/serviceSum", v1.GetServerSum)
+	  //获取图表信息
+	  serviceApi.GET("/serviceList", v1.GetServerList)
+      //新增服务
+	  serviceApi.POST("/addService", v1.ImportService)
+	  //查询服务明细
+	  serviceApi.GET("/serviceDetail/:serverId", v1.GetServerDetail)
+	  //编辑服务
+	  serviceApi.POST("/editService", v1.EditService)
+	  //编辑服务
+	  serviceApi.POST("/deleteService", v1.DeleteService)
+	}
+	// 系统部分
+	systemApi := apiRoot.Group("/system")
+	{
+	  //修改mq	
+	  systemApi.POST("/editRabbitMq", v1.EditRabbitMq)
+	  //修改consul
+	  systemApi.POST("/editConsul", v1.EditConsul)
+	  // 查询配置详情
+	  systemApi.GET("/systemDetail", v1.GetSystemDetail)
+	}
 	return r
 }
