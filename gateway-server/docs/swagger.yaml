@@ -1,0 +1,264 @@
+info:
+  contact: {}
+  license: {}
+paths:
+  /uiApi/v1/eumn/serverTypeList:
+    get:
+      consumes:
+      - application/json
+      description: 查询服务类型
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 服务类型
+      tags:
+      - 字典项模块
+  /uiApi/v1/index/actualTime:
+    get:
+      consumes:
+      - application/json
+      description: 查询今日实时数据
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 查询今日实时数据
+      tags:
+      - 首页模块
+  /uiApi/v1/index/charts/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 查询图表数据详情
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 查询图表数据详情
+      tags:
+      - 首页模块
+  /uiApi/v1/index/sum:
+    get:
+      consumes:
+      - application/json
+      description: 查询首页汇总信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 查询首页汇总信息
+      tags:
+      - 首页模块
+  /uiApi/v1/index/warningList:
+    get:
+      consumes:
+      - application/json
+      description: 查询最近7条告警数据
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 查询最近7条告警数据
+      tags:
+      - 首页模块
+  /uiApi/v1/service/addService:
+    post:
+      consumes:
+      - application/json
+      description: 新增服务
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 新增服务
+      tags:
+      - 服务模块
+  /uiApi/v1/service/deleteService:
+    post:
+      consumes:
+      - application/json
+      description: 删除服务
+      parameters:
+      - description: ServiceId
+        in: path
+        name: serviceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 删除服务
+      tags:
+      - 服务模块
+  /uiApi/v1/service/editService:
+    post:
+      consumes:
+      - application/json
+      description: 编辑服务
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 编辑服务
+      tags:
+      - 服务模块
+  /uiApi/v1/service/serviceDetail/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 查询服务详情
+      parameters:
+      - description: Type
+        in: path
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 服务详情
+      tags:
+      - 服务模块
+  /uiApi/v1/service/serviceList:
+    get:
+      consumes:
+      - application/json
+      description: 查询服务列表
+      parameters:
+      - description: Type
+        in: path
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 服务列表
+      tags:
+      - 服务模块
+  /uiApi/v1/service/serviceSum:
+    get:
+      consumes:
+      - application/json
+      description: 查询服务数据汇总
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 服务数据汇总
+      tags:
+      - 服务模块
+  /uiApi/v1/system/editConsul:
+    post:
+      consumes:
+      - application/json
+      description: 编辑consul数据
+      parameters:
+      - description: Address
+        in: path
+        name: address
+        required: true
+        type: string
+      - description: Port
+        in: path
+        name: port
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 编辑consul数据
+      tags:
+      - 系统模块
+  /uiApi/v1/system/editRabbitMq:
+    post:
+      consumes:
+      - application/json
+      description: 编辑rabbitMq数据
+      parameters:
+      - description: Address
+        in: path
+        name: address
+        required: true
+        type: string
+      - description: Port
+        in: path
+        name: port
+        type: string
+      - description: UserName
+        in: path
+        name: userName
+        type: string
+      - description: Psssword
+        in: path
+        name: psssword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 编辑rabbitMq数据
+      tags:
+      - 系统模块
+  /uiApi/v1/system/systemDetail:
+    get:
+      consumes:
+      - application/json
+      description: 查询系统配置详情
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 系统详情
+      tags:
+      - 系统模块
+swagger: "2.0"

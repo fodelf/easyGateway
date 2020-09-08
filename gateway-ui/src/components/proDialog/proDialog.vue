@@ -4,7 +4,7 @@
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-22 17:59:36
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-04 10:08:28
+ * @LastEditTime: 2020-09-08 08:51:56
  -->
 <template>
   <el-dialog
@@ -138,16 +138,16 @@
 
 <script>
 import {
-  getProjectType,
-  addProject,
-  updateProject
+  getServiceType,
+  addService,
+  updateService
 } from '@/api/index/projectManage.js'
-import selectTem from '@/components/selectTem/selectTem.vue'
+// import selectTem from '@/components/selectTem/selectTem.vue'
 export default {
   name: 'proDialog',
-  components: {
-    selectTem
-  },
+  // components: {
+  //   selectTem
+  // },
   props: ['itemObj', 'type'],
   data() {
     return {
@@ -211,7 +211,7 @@ export default {
       this.$refs.proForm.resetFields()
     },
     queryProTypeList() {
-      getProjectType({}).then(res => {
+      getServiceType({}).then(res => {
         // console.log(res)
         this.typeList = res || []
       })
@@ -229,7 +229,7 @@ export default {
       this.$refs.proForm.validate(valid => {
         if (valid) {
           if (this.$props.type == 'add') {
-            addProject(this.proForm).then(() => {
+            addService(this.proForm).then(() => {
               this.$message({
                 type: 'success',
                 message: '新增成功！'

@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:55:11
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 19:36:36
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-08 21:05:03
  */
 import cardNum from '@/components/cardNum/cardNum'
 import carousel from '@/components/carousel/carousel.vue'
@@ -22,7 +22,7 @@ export default {
         {
           icon: 'icon-xiangmu',
           label: '服务总数',
-          num: 3,
+          num: 0,
           percent: '50%',
           proColor: '#fb9678',
           key: 'serverSum'
@@ -30,7 +30,7 @@ export default {
         {
           icon: 'icon-mobanguanli1',
           label: '告警总数',
-          num: 1200,
+          num: 0,
           percent: '60%',
           proColor: '#01c0c8',
           key: 'warningSum'
@@ -38,7 +38,7 @@ export default {
         {
           icon: 'icon-mobanguanli',
           label: '请求总数',
-          num: 789,
+          num: 0,
           percent: '70%',
           proColor: '#ab8ce4',
           key: 'requestSum'
@@ -46,7 +46,7 @@ export default {
         {
           icon: 'icon-gongju',
           label: '失败总数',
-          num: 234,
+          num: 0,
           percent: '80%',
           proColor: '#00c292',
           key: 'failSum'

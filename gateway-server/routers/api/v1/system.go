@@ -20,9 +20,9 @@ import (
 // @Router /uiApi/v1/system/editConsul [post]
 func EditConsul(c *gin.Context) {
 	appG := app.Gin{C: c}
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
-	})
+	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 }
+
 // @Tags  系统模块
 // @Summary 编辑rabbitMq数据
 // @Description 编辑rabbitMq数据
@@ -36,9 +36,9 @@ func EditConsul(c *gin.Context) {
 // @Router /uiApi/v1/system/editRabbitMq [post]
 func EditRabbitMq(c *gin.Context) {
 	appG := app.Gin{C: c}
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
-	})
+	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 }
+
 // @Tags  系统模块
 // @Summary 系统详情
 // @Description 查询系统配置详情
@@ -50,14 +50,14 @@ func GetSystemDetail(c *gin.Context) {
 	appG := app.Gin{C: c}
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
 		"rabbitMq": map[string]interface{}{
-			"address":"187:10:10;10",
-			"port":"8500",
-			"userName":"xxx",
-            "psssword":"xxxxxxx",
+			"address":  "187:10:10;10",
+			"port":     "8500",
+			"userName": "xxx",
+			"psssword": "xxxxxxx",
 		},
-		"consul":map[string]interface{}{
-			"address":"187:10:10;10",
-            "port":"8500",
+		"consul": map[string]interface{}{
+			"address": "187:10:10;10",
+			"port":    "8500",
 		},
 	})
 }

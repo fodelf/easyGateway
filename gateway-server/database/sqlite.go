@@ -1,25 +1,47 @@
-package database
+package service
 
 import (
+	model "gateway/models"
+	InterfaceEntity "gateway/models/InterfaceEntity"
 	"log"
+	"time"
 
-	"github.com/xormplus/xorm" // 记得 go get 获取哦
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-// ORM xorm引擎的实例，供其他模块可以直接使用，注意**首字母大写**，因为`Go`语音的隐藏和公开的规则，大写为公开，小写为隐藏。
-var ORM *xorm.Engine
+var DB *gorm.DB
 
-func init() { // 使用init来自动连接数据库，并创建ORM实例
+func ConnectDB() {
 	var err error
-	ORM, err = xorm.NewEngine("sqlite3", "./database/test.db")
-	if err != nil {
-		log.Fatalln(err)
-		return
+	DB, err = gorm.Open("sqlite3", "gateway.db")
+	// defer DB.Close()
+	if err = DB.AutoMigrate(model.Models...).Error; nil != err {
+		log.Fatal("auto migrate tables failed: " + err.Error())
 	}
-	err = ORM.Ping() // 测试能操作数据库
-	if err != nil {
-		log.Fatalln(err)
-		return
+	// 初始化汇总数据
+	var sumInfo InterfaceEntity.SumInfo
+	var chartInfo InterfaceEntity.ChartInfo
+	if err := DB.Find(&sumInfo).Error; err != nil {
+		sumInfo := InterfaceEntity.SumInfo{
+			ServerSum:  0,
+			WarningSum: 0,
+			RequestSum: 0,
+			FailSum:    0,
+		}
+		DB.Create(&sumInfo)
 	}
-	ORM.ShowSQL(true) // 测试环境，显示每次执行的sql语句长什么样子
+	if err := DB.Find(&chartInfo).Error; err != nil {
+		chartInfo := InterfaceEntity.ChartInfo{
+			Time:    time.Now().Format("2006/01/02"),
+			Total:   0,
+			Success: 0,
+			Fail:    0,
+		}
+		DB.Create(&chartInfo)
+	}
+	DB.DB().SetMaxIdleConns(10)
+	DB.DB().SetMaxOpenConns(50)
+	DB.DB().SetConnMaxLifetime(5 * time.Minute)
+	DB.LogMode(true)
 }

@@ -1,0 +1,406 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {},
+        "license": {}
+    },
+    "paths": {
+        "/uiApi/v1/eumn/serverTypeList": {
+            "get": {
+                "description": "查询服务类型",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "字典项模块"
+                ],
+                "summary": "服务类型",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/index/actualTime": {
+            "get": {
+                "description": "查询今日实时数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "首页模块"
+                ],
+                "summary": "查询今日实时数据",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/index/charts/{id}": {
+            "get": {
+                "description": "查询图表数据详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "首页模块"
+                ],
+                "summary": "查询图表数据详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/index/sum": {
+            "get": {
+                "description": "查询首页汇总信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "首页模块"
+                ],
+                "summary": "查询首页汇总信息",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/index/warningList": {
+            "get": {
+                "description": "查询最近7条告警数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "首页模块"
+                ],
+                "summary": "查询最近7条告警数据",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/service/addService": {
+            "post": {
+                "description": "新增服务",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "服务模块"
+                ],
+                "summary": "新增服务",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/service/deleteService": {
+            "post": {
+                "description": "删除服务",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "服务模块"
+                ],
+                "summary": "删除服务",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ServiceId",
+                        "name": "serviceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/service/editService": {
+            "post": {
+                "description": "编辑服务",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "服务模块"
+                ],
+                "summary": "编辑服务",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/service/serviceDetail/{id}": {
+            "get": {
+                "description": "查询服务详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "服务模块"
+                ],
+                "summary": "服务详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Type",
+                        "name": "type",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/service/serviceList": {
+            "get": {
+                "description": "查询服务列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "服务模块"
+                ],
+                "summary": "服务列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Type",
+                        "name": "type",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/service/serviceSum": {
+            "get": {
+                "description": "查询服务数据汇总",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "服务模块"
+                ],
+                "summary": "服务数据汇总",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/system/editConsul": {
+            "post": {
+                "description": "编辑consul数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统模块"
+                ],
+                "summary": "编辑consul数据",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Port",
+                        "name": "port",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/system/editRabbitMq": {
+            "post": {
+                "description": "编辑rabbitMq数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统模块"
+                ],
+                "summary": "编辑rabbitMq数据",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Port",
+                        "name": "port",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "UserName",
+                        "name": "userName",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Psssword",
+                        "name": "psssword",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/uiApi/v1/system/systemDetail": {
+            "get": {
+                "description": "查询系统配置详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统模块"
+                ],
+                "summary": "系统详情",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

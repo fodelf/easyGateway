@@ -3,8 +3,8 @@
  * @Author: pym
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-29 22:26:36
- * @LastEditors: pym
- * @LastEditTime: 2020-03-30 23:07:37
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-08 08:51:19
  -->
 <template> 
   <el-dialog :visible='selectTemVisible' append-to-body title='选择模板' :before-close="close" width='50%' v-if='selectTemVisible'>
@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { getTemList, getProjectType } from '@/api/index/projectManage.js'
+import { getTemList, getServiceType } from '@/api/index/projectManage.js'
 export default {
   name:'selectTem',
   props:['value'],

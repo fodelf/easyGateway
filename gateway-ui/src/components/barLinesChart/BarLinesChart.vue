@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:59:55
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 19:00:23
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-08 20:27:05
  -->
 <template>
   <div ref="chart" id ='chart'></div>
@@ -123,7 +123,7 @@ export default {
     chartData:function(newValue) {
       if(JSON.stringify(newValue) != '{}'){
         console.log(newValue)
-        this.option.xAxis.data = newValue.timeList
+        this.option.xAxis[0].data = newValue.timeList
         let failObj = {
           name: '失败次数',
           type:'bar',

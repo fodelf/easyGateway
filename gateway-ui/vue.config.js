@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: http://gitlab.yzf.net/wuwenzhou
  * @Date: 2019-11-19 08:46:03
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 18:40:52
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-08 08:45:42
  */
 const path = require('path')
 const ispro = process.env.NODE_ENV !== 'development'
@@ -36,12 +36,8 @@ module.exports = {
     port:9527,
     proxy: {
       '/uiApi': {
-        target: 'http://192.168.0.105:9523'
-      },
-      '/socket.io': {
-        target: 'http://localhost:9526',
-        ws:true
-      },
+        target: 'http://127.0.0.1:9523'
+      }
     },
     before:(app) =>{
       app.all('*', function (req, res, next) {

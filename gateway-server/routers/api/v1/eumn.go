@@ -5,9 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/EDDYCJY/go-gin-example/pkg/app"
-	"github.com/EDDYCJY/go-gin-example/pkg/e"
+	"gateway/pkg/app"
+	"gateway/pkg/e"
 )
+
 // @Tags  字典项模块
 // @Summary 服务类型
 // @Description 查询服务类型
@@ -19,10 +20,10 @@ func GetServerType(c *gin.Context) {
 	appG := app.Gin{C: c}
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
 		"serverTypeList": [1]map[string]interface{}{
-		 {
-		  "label":"http",
-		  "value":"http",
-		 },
+			{
+				"label": "http",
+				"value": "http",
+			},
 		},
 	})
 }
