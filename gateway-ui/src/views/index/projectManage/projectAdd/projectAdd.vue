@@ -3,15 +3,16 @@
  * @version: 
  * @Author: pym
  * @Date: 2020-09-06 15:56:41
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 21:33:42
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-09 17:40:06
 -->
 <template>
+<div>
   <el-form :model="ruleForm" :rules='serviceRules' :inline="true" class='projectAdd' label-width='150px' label-position="left" :disabled="$route.query.type=='check'">
     <el-tabs v-model="baseInfo">
       <el-tab-pane label="基本信息" name="baseInfo"></el-tab-pane>
     </el-tabs>
-    <el-row gutter="20">
+    <el-row :gutter=20>
       <el-col :span='8'>
         <el-form-item label="服务名称" prop='serviceName'>
           <el-input type='text' v-model="ruleForm.serviceName" placeholder="请输入英文字母"></el-input>
@@ -25,7 +26,7 @@
         </el-form-item>
       </el-col>
     </el-row>
-    <el-row gutter="20">
+    <el-row :gutter=20>
       <el-col :span='8'>
         <el-form-item label="服务地址" prop='serviceAddress'>
           <el-input type='text' v-model="ruleForm.serviceAddress" placeholder="示例：127.0.0.1"></el-input>
@@ -37,7 +38,7 @@
         </el-form-item>
       </el-col>
     </el-row>
-    <el-row gutter="20">
+    <el-row :gutter=20>
        <el-col :span="8">
          <el-form-item label="熔断">
            <el-input type='text' v-model='ruleForm.serviceBreak' placeholder="请求超时时间"></el-input>
@@ -56,9 +57,10 @@
       </el-form-item>
     </el-row>
     <el-form :model="item" v-for="(item,index) in ruleForm.serviceRules" :key='index' label-width='150px' :inline="true">
-      <el-row gutter="20">
+      <el-row :gutter=20>
         <el-col :span='8'>
-          <el-form-item label="拦截地址" prop='interceptLoc' :rules="{ required: true, message: '请输入拦截地址', trigger: 'blur' }">
+          <!-- /<el-form-item label="拦截地址" prop='interceptLoc' :rules="{ required: true, message: '请输入拦截地址', trigger: 'blur' }"> -->
+          <el-form-item label="拦截地址">
             <el-input type='text' v-model="item.url" placeholder="示例：/api,不能以ui开头"></el-input>
           </el-form-item>
         </el-col>
@@ -72,10 +74,17 @@
         </el-col>
       </el-row>
      </el-form>
+    <!-- <el-row :gutter=20>
+      <el-col :span='8'>
+        <el-form-item label="描述信息" prop='serviceAddress'>
+          <el-input type='text' v-model="ruleForm.serviceAddress" placeholder="示例：127.0.0.1"></el-input>
+        </el-form-item>
+      </el-col>
+    </el-row> -->
      <el-tabs v-model="useConsul">
       <el-tab-pane label="注册中心服务信息配合consul使用" name="useConsul"></el-tab-pane>
     </el-tabs>
-    <el-row gutter="20">
+    <el-row :gutter=20>
        <el-col :span="8">
          <el-form-item label="服务ID">
            <el-input type='text' v-model='ruleForm.useConsulId' placeholder="请输入英文字母"></el-input>
@@ -87,7 +96,7 @@
          </el-form-item>
        </el-col>
      </el-row>
-     <el-row gutter="20">
+     <el-row :gutter=20>
        <el-col :span="8">
          <el-form-item label="监控检查接口">
            <el-input type='text' v-model='ruleForm.useConsulCheckPath' placeholder="示例：'/checkHealth'"></el-input>
@@ -99,7 +108,7 @@
          </el-form-item>
        </el-col>
      </el-row>
-     <el-row gutter="20">
+     <el-row :gutter=20>
        <el-col :span="8">
          <el-form-item label="健康检查间隔(秒)">
            <el-input type='text' v-model='ruleForm.useConsulInterval' placeholder="默认10s"></el-input>
@@ -114,7 +123,7 @@
      <el-tabs v-model="messageWarn">
       <el-tab-pane label="钉钉信息（消息告警）" name="messageWarn"></el-tab-pane>
     </el-tabs>
-    <el-row gutter="20">
+    <el-row :gutter=20>
        <el-col :span="8">
          <el-form-item label="钉钉accessToken">
            <el-input type='text' v-model='ruleForm.dingdingAccessToken' placeholder="请输入"></el-input>
@@ -144,6 +153,10 @@
         <el-button type='default' @click='cancel'>取消</el-button>
      </el-form-item>
   </el-form>
+    <!-- <el-button type="primary" @click="saveRule" v-if="$route.query.type === 'add'">保存</el-button>
+    <el-button type="primary" @click="updateRule" v-if="$route.query.type === 'edit'">保存</el-button>
+    <el-button type='default' @click='cancel'>取消</el-button> -->
+</div>
 </template>
 
 <script>

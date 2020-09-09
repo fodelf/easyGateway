@@ -24,3 +24,9 @@ type ChartInfo struct {
 // 	SuccessList []int    `json:"successList"`
 // 	FailList    []int    `json:"failList"`
 // }
+// 图表实体类
+type WarningInfo struct {
+	WarningID int    `json:"warning_id" gorm:"index"`
+	Time      string `json:"time"`
+	System    string `json:"system"`
+}

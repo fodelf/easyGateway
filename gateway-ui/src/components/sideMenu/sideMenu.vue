@@ -3,8 +3,8 @@
  * @version: 
  * @Author: pym
  * @Date: 2020-08-11 10:08:07
- * @LastEditors: pym
- * @LastEditTime: 2020-08-18 15:02:48
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-09 17:56:30
 -->
 <template>
   <div class="sideMenu" :class="isCollapse?'min-sideBar':'sideBar'">
@@ -14,7 +14,7 @@
     </p>
     <!-- <el-scrollbar wrap-class="scrollbar-wrapper"
                   class="side"> -->
-      <el-menu :default-active="$route.path"
+      <el-menu :default-active="defaultActive"
                 router
                 class="nav"
                 background-color="#353c48"
@@ -35,6 +35,18 @@ export default {
   name:'sideMenu',
   components:{
     treeMenuModule
+  },
+  computed: {
+    defaultActive() {
+      // 暂时写死的
+      if(this.$route.path.indexOf('/project') >=0){
+        return "/project/projectManage";
+      }else if(this.$route.path.indexOf('/system') >=0){
+        return "/system/serviceSet";
+      }else{
+        return "/home"
+      }
+    }
   },
   data() {
     return {

@@ -4,7 +4,7 @@
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:55:11
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-08 21:05:03
+ * @LastEditTime: 2020-09-09 18:07:14
  */
 import cardNum from '@/components/cardNum/cardNum'
 import carousel from '@/components/carousel/carousel.vue'
@@ -17,7 +17,7 @@ export default {
   data() {
     return {
       chartData:null,
-      serviceType:'',
+      serviceType:'all',
       cardList: [
         {
           icon: 'icon-xiangmu',
@@ -52,7 +52,12 @@ export default {
           key: 'failSum'
         }
       ],
-      systemStatus:{},
+      systemStatus:{
+        "dataSum":{"fail":0,"success":0,"total":0},
+        "realTime":"2020/09/09",
+        "todayState":
+        "good"
+      },
       carouselList: [],
       todoList: [],
       personalObj: {

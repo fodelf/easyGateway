@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:55:11
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 21:40:28
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-09 17:43:19
  */
 import menuList from 'components/menuList/menuList.vue'
 import tableBox from 'components/tableBox/tableBox.vue'
@@ -24,7 +24,7 @@ export default {
         title: '服务总计',
         total: 0,
         menuList: [],
-        active:''
+        active:'all'
       },
       tablePag: {
         pageNo: 1,
@@ -54,7 +54,9 @@ export default {
     addPro() {
       this.$router.push({
         name:'projectAdd',
-        type:'add'
+        query:{
+          type:'add'
+        }
       })
     },
     /**

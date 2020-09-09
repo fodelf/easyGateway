@@ -1,7 +1,11 @@
 package v1
 
 import (
+	service "gateway/database"
+	InterfaceEntity "gateway/models/InterfaceEntity"
+	Utils "gateway/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
@@ -17,15 +21,26 @@ import (
 // @Router /uiApi/v1/service/serviceSum [get]
 func GetServerSum(c *gin.Context) {
 	appG := app.Gin{C: c}
+	var (
+		serviceInfo InterfaceEntity.ServiceInfo
+		sum         int                      = 0
+		count       int                      = 0
+		serverList  []map[string]interface{} = []map[string]interface{}{}
+	)
+	tx := service.DB.Begin()
+	if err := tx.Model(&serviceInfo).Count(&sum).Error; err != nil {
+	}
+	if err := tx.Model(&serviceInfo).Where("service_type =?", "http").Count(&count).Error; err != nil {
+	}
+	var serviceInterface = map[string]interface{}{
+		"label": "http",
+		"count": count,
+		"value": "http",
+	}
+	serverList = append(serverList, serviceInterface)
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
-		"serverList": [1]map[string]interface{}{
-			{
-				"label": "http",
-				"count": 1,
-				"value": "http",
-			},
-		},
-		"sum": 1,
+		"serverList": serverList,
+		"sum":        sum,
 	})
 }
 
@@ -44,34 +59,15 @@ type Rule struct {
 // @Router /uiApi/v1/service/serviceList [get]
 func GetServerList(c *gin.Context) {
 	appG := app.Gin{C: c}
+	var (
+		serverList []InterfaceEntity.ServiceInfo = []InterfaceEntity.ServiceInfo{}
+	)
+	if err := service.DB.Find(&serverList).Error; err != nil {
+
+	} else {
+	}
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
-		"serverList": [1]map[string]interface{}{
-			{
-				"serverId":       "xxxxxx",
-				"serviceName":    "XX",
-				"serviceType":    "http",
-				"serviceAddress": "127.0.0.1",
-				"servicePort":    "300",
-				"serviceLmit":    200,
-				"serviceBreak":   30,
-				"serviceRules": [1]map[string]interface{}{
-					{
-						"url":         "/api",
-						"pathReWrite": `{/api:''}`,
-					},
-				},
-				"useConsulId":         "xxxxx",
-				"useConsulTag":        "ss",
-				"useConsulCheckPath":  "/checkHealth",
-				"useConsulPort":       9990,
-				"useConsulInterval":   10,
-				"useConsulTimeout":    3,
-				"dingdingAccessToken": "xxxxxxxxxx",
-				"dingdingSercet":      "xxxxxxxxxx",
-				"dingdingList":        []int{18651892475},
-			},
-		},
-		"total": 1,
+		"serverList": serverList,
 	})
 }
 
@@ -118,8 +114,53 @@ func GetServerDetail(c *gin.Context) {
 // @Produce  json
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/service/addService [post]
+//汇总实体类
 func ImportService(c *gin.Context) {
 	appG := app.Gin{C: c}
+	var (
+		serviceInfo  InterfaceEntity.ServiceInfo = InterfaceEntity.ServiceInfo{}
+		DingdingList string                      = ""
+		ServiceRules string                      = ""
+	)
+	var body = Utils.GetJsonBody(c)
+	var dingdingList = body["dingdingList"].([]interface{})
+	for i := 0; i < len((dingdingList)); i++ {
+		var dingding = dingdingList[i].(string)
+		DingdingList = DingdingList + "," + dingding
+	}
+	var serviceRules = body["serviceRules"].([]interface{})
+	for i := 0; i < len((serviceRules)); i++ {
+		var service = serviceRules[i].(map[string]interface{})
+		ServiceRules = ServiceRules + "," + service["url"].(string) + "@" + service["pathReWrite"].(string)
+	}
+	servicePort, _ := strconv.Atoi(body["servicePort"].(string))
+	serviceLimit, _ := strconv.Atoi(body["serviceLimit"].(string))
+	serviceBreak, _ := strconv.Atoi(body["serviceBreak"].(string))
+	useConsulPort, _ := strconv.Atoi(body["useConsulPort"].(string))
+	useConsulInterval, _ := strconv.Atoi(body["useConsulInterval"].(string))
+	useConsulTimeout, _ := strconv.Atoi(body["useConsulTimeout"].(string))
+	serviceInfo = InterfaceEntity.ServiceInfo{
+		ServerId:            Utils.GenerateUUID(),
+		ServiceName:         body["serviceName"].(string),
+		ServiceType:         body["serviceType"].(string),
+		ServiceAddress:      body["serviceAddress"].(string),
+		ServicePort:         servicePort,
+		ServiceLimit:        serviceLimit,
+		ServiceBreak:        serviceBreak,
+		ServiceRules:        ServiceRules,
+		UseConsulId:         body["useConsulId"].(string),
+		UseConsulTag:        body["useConsulTag"].(string),
+		UseConsulCheckPath:  body["useConsulCheckPath"].(string),
+		UseConsulPort:       useConsulPort,
+		UseConsulInterval:   useConsulInterval,
+		UseConsulTimeout:    useConsulTimeout,
+		DingdingAccessToken: body["dingdingAccessToken"].(string),
+		DingdingSecret:      body["dingdingSecret"].(string),
+		DingdingList:        DingdingList,
+	}
+	if err := service.DB.Create(&serviceInfo).Error; err != nil {
+	}
+
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 }
 

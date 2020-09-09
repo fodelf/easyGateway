@@ -3,8 +3,8 @@
  * @version: 
  * @Author: pym
  * @Date: 2020-09-06 15:27:04
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 19:54:50
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-09 19:15:05
 -->
 <template>
   <div class="projectManage">
@@ -17,11 +17,11 @@
         <el-button type="primary" icon="el-icon-plus" @click="addPro"
           >新增</el-button
         >
-        <el-input
+        <!-- <el-input
           v-model="keyword"
           class="keyInpt"
           placeholder="请输入关键字"
-        ></el-input>
+        ></el-input> -->
       </p>
       <!--表格组件-->
       <div class="tableCon">
@@ -48,12 +48,12 @@
       </div> -->
     </div>
     <!--弹窗组件-->
-    <proDialog
+    <!-- <proDialog
       ref="proDialog"
       :itemObj="itemObj"
       :type="type"
       @getList="getList"
-    ></proDialog>
+    ></proDialog> -->
   </div>
 </template>
 

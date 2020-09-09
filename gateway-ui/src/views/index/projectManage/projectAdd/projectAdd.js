@@ -3,8 +3,8 @@
  * @version: 
  * @Author: pym
  * @Date: 2020-09-06 15:56:49
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 21:31:32
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-09 09:23:31
  */
 import {
   getServiceType,
@@ -41,7 +41,7 @@ export default {
         useConsulInterval:'',
         useConsulTimeout:'',
         dingdingAccessToken:'',
-        dingdingSercet:'',
+        dingdingSecret:'',
         dingdingList:[],
       },
       serviceRules:{
@@ -145,7 +145,7 @@ export default {
         useConsulInterval:'',
         useConsulTimeout:'',
         dingdingAccessToken:'',
-        dingdingSercet:'',
+        dingdingSecret:'',
         dingdingList:[],
       }
     }

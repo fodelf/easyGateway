@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"fmt"
 	service "gateway/database"
 	InterfaceEntity "gateway/models/InterfaceEntity"
 	"net/http"
@@ -62,7 +61,6 @@ func GetCharts(c *gin.Context) {
 			charts[i], charts[j] = charts[j], charts[i]
 		}
 		for i := 0; i < len(charts); i++ {
-			fmt.Println(i)
 			// t := reflect.TypeOf(charts[i])
 			// immutable := reflect.ValueOf(charts[i])
 			total := Utils.GetStructValue(charts[i], "Total")
@@ -171,15 +169,28 @@ func GetActualTime(c *gin.Context) {
 // @Router /uiApi/v1/index/warningList [get]
 func GetWarningList(c *gin.Context) {
 	appG := app.Gin{C: c}
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
-		"warningList": [7]string{
-			"xx系统于2019年9月1号10时24分异常",
-			"ss系统于2019年9月1号10时24分异常",
-			"bb系统于2019年9月1号11时24分异常",
-			"dd系统于2019年9月1号13时24分异常",
-			"ss系统于2019年9月1号15时24分异常",
-			"xx系统于2019年9月1号16时24分异常",
-			"xx系统于2019年9月1号17时24分异常",
-		},
-	})
+	var (
+		warnings   []InterfaceEntity.WarningInfo
+		resultList []string = []string{}
+	)
+	if err := service.DB.Limit(7).Order("warning_id DESC").Find(&warnings).Error; err != nil {
+		// appG.Response(http.StatusInternalServerError, e.ERROR, nil)
+		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
+			"warningList": resultList,
+		})
+	} else {
+		for i, j := 0, len(warnings)-1; i < j; i, j = i+1, j-1 {
+			warnings[i], warnings[j] = warnings[j], warnings[i]
+		}
+		for i := 0; i < len(warnings); i++ {
+			var warning = warnings[i]
+			time := Utils.GetStructValueString(warning, "Time")
+			system := Utils.GetStructValueString(warning, "System")
+			var str = system + "系统于" + time + "异常"
+			resultList = append(resultList, str)
+		}
+		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
+			"warningList": resultList,
+		})
+	}
 }

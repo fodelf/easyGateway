@@ -1,8 +1,8 @@
 <!--
  * @Author: 吴文周
  * @Date: 2020-04-12 16:16:34
- * @LastEditTime: 2020-09-06 19:34:30
- * @LastEditors: pym
+ * @LastEditTime: 2020-09-09 08:50:38
+ * @LastEditors: 吴文周
  * @Description: 首页模块
  * @FilePath: /workespacemanger/src/views/home/Home.vue
  -->
@@ -24,7 +24,7 @@
             <el-col :span='4'>
               <el-select v-model="serviceType">
                 <el-option label='全部' value='all'></el-option>
-                <el-option label='服务一' value='serviceFirst'></el-option>
+                <!-- <el-option label='服务一' value='serviceFirst'></el-option> -->
               </el-select>
             </el-col>
           </el-row>

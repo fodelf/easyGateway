@@ -3,13 +3,13 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-21 21:17:29
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 20:00:19
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-09 17:42:06
  -->
 <template>
   <div class="menuList">
-    <p class="menuTit itemNum clearfix">
-      <span>{{ menuObj.title }}</span>
+    <p class="menuTit itemNum clearfix" :class="currentIndex == 'all'? 'active' : ''" @click="handleClickMenu({type:'all'})">
+      <span >{{ menuObj.title }}</span>
       <i>{{ menuObj.total }}</i>
     </p>
     <ul class="menuCon">
@@ -43,14 +43,14 @@ export default {
           title: '',
           total: 0,
           menuList: [],
-          active:''
+          active:'all'
         }
       },
     },
   },
   data() {
     return {
-      currentIndex: null,
+      currentIndex: 'all',
     }
   },
   watch:{

@@ -3,8 +3,8 @@
  * @version: 
  * @Author: pym
  * @Date: 2020-08-18 11:02:53
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 21:19:40
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-09 09:18:12
 -->
 <template>
   <el-card class="box-card">
@@ -13,7 +13,7 @@
       <el-button type="primary" class='editBtn' size='mini' @click='edit'>编辑</el-button>
     </div>
     <el-form label-width='100px' label-position="left">
-      <el-form-item label='ip'>
+      <el-form-item label='地址'>
         {{item.address}}
       </el-form-item>
       <el-form-item label='端口号'>
