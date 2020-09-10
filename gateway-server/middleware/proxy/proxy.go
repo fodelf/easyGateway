@@ -23,7 +23,7 @@ func grepProxy(url string) map[string]interface{} {
 		}
 	)
 	ProxyConfig = append(ProxyConfig, map[string]interface{}{
-		"serviceAddress": "172.23.0.187",
+		"serviceAddress": "127.0.0.1",
 		"prot":           9990,
 		"serviceRules": [1]map[string]interface{}{
 			{
