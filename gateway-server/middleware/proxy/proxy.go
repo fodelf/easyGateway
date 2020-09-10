@@ -7,24 +7,75 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-func ReverseProxy() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		target := "http://172.23.0.187:9990/"
-		u, err := url.Parse(target)
-		if err != nil {
-			fmt.Println(err)
+var ProxyConfig []map[string]interface{}
+
+func grepProxy(url string) map[string]interface{} {
+	fmt.Println(url)
+	var (
+		ServerConfig map[string]interface{} = map[string]interface{}{
+			"flag": true,
 		}
-		fmt.Println(u.Host)
+	)
+	ProxyConfig = append(ProxyConfig, map[string]interface{}{
+		"serviceAddress": "172.23.0.187",
+		"prot":           9990,
+		"serviceRules": [1]map[string]interface{}{
+			{
+				"url":         "/api",
+				"pathReWrite": `{/api:''}`,
+			},
+		},
+	})
+	for i := 0; i < len(ProxyConfig); i++ {
+		var child = ProxyConfig[i]
+		var rules = child["serviceRules"].([]interface{})
+		fmt.Println(rules)
+		for k := 0; k < len(rules); k++ {
+			var rule = rules[k].(map[string]interface{})
+			fmt.Println(rule["url"].(string))
+			if strings.HasPrefix(url, rule["url"].(string)) {
+				ServerConfig = map[string]interface{}{
+					"flag":           false,
+					"serviceAddress": child["serviceAddress"].(string),
+					"prot":           child["prot"].(string),
+					"serviceRules": map[string]interface{}{
+						"url":         rule["url"].(string),
+						"pathReWrite": rule["pathReWrite"].(string),
+					},
+				}
+				break
+			}
+		}
+	}
+	return ServerConfig
+}
+
+func ReverseProxy() gin.HandlerFunc {
+	fmt.Println("0000")
+	return func(c *gin.Context) {
+		fmt.Println("1111111")
+		var proxyObj = grepProxy(c.FullPath())
+		fmt.Println("222")
+		if proxyObj["flag"].(bool) {
+			c.Next()
+		}
+		fmt.Println("22222")
+		// target := "http://172.23.0.187:9990/"
+		// u, err := url.Parse(target)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
+		var serviceAddress = proxyObj["serviceAddress"].(string)
+		var prot = proxyObj["prot"].(string)
 		director := func(req *http.Request) {
 			req.URL.Scheme = "http"
-			req.URL.Host = "172.23.0.187:9990"
+			req.URL.Host = (serviceAddress + ":" + prot)
 			req.URL.Path = "/cloud-platform/system/searchAllSystem"
 		}
 		//更改内容

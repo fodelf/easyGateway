@@ -24,4 +24,5 @@ type ServiceInfo struct {
 	DingdingAccessToken string `json:"dingdingAccessToken"`
 	DingdingSecret      string `json:"dingdingSecret"`
 	DingdingList        string `json:"dingdingList"`
+	DeleteFlag          int    `json:"deleteFlag"`
 }

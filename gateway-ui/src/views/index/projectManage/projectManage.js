@@ -4,7 +4,7 @@
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:55:11
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-09 17:43:19
+ * @LastEditTime: 2020-09-10 16:20:48
  */
 import menuList from 'components/menuList/menuList.vue'
 import tableBox from 'components/tableBox/tableBox.vue'
@@ -106,12 +106,12 @@ export default {
     deleteRow(data) {
       this.$confirm('确认删除此服务？')
         .then(() => {
-          deleteService({ serviceId: data.serviceId }).then(() => {
+          deleteService({ serverId: data.serverId }).then(() => {
             this.$message({
               type: 'success',
               message: '删除成功'
             })
-            this.selectMenu(data)
+            this.queryProList(true)
           })
         })
         .catch(() => {})

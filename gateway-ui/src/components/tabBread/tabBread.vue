@@ -4,7 +4,7 @@
  * @Github: https://github.com/fodelf
  * @Date: 2020-04-04 09:49:32
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-04-07 19:16:33
+ * @LastEditTime: 2020-09-10 09:07:57
  -->
 <template>
   <div class="tabBread">
@@ -43,6 +43,17 @@ export default {
       // const first = matched[0]
       this.levelList = matched
       this.currentTab = this.levelList[this.levelList.length - 1].meta.title
+      // 当前写死一个服务后面写出策略映射
+      if(this.$route.query.type =='check'){
+        this.currentTab ="查看服务"
+        this.levelList[1].meta.title ="查看服务"
+      }else if(this.$route.query.type =="add"){
+        this.currentTab ="新增服务"
+        this.levelList[1].meta.title ="新增服务"
+      }else if (this.$route.query.type =="edit"){
+        this.currentTab ="编辑服务"
+        this.levelList[1].meta.title="编辑服务"
+      }
     }
   }
 }

@@ -1,14 +1,16 @@
 package v1
 
 import (
+	"fmt"
 	service "gateway/database"
 	InterfaceEntity "gateway/models/InterfaceEntity"
 	Utils "gateway/utils"
 	"net/http"
 	"strconv"
 
+	"gateway/pkg/e"
+
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
-	"github.com/EDDYCJY/go-gin-example/pkg/e"
 	"github.com/gin-gonic/gin"
 )
 
@@ -62,7 +64,7 @@ func GetServerList(c *gin.Context) {
 	var (
 		serverList []InterfaceEntity.ServiceInfo = []InterfaceEntity.ServiceInfo{}
 	)
-	if err := service.DB.Find(&serverList).Error; err != nil {
+	if err := service.DB.Find(&serverList).Where("delete_flag =?", 0).Error; err != nil {
 
 	} else {
 	}
@@ -81,30 +83,14 @@ func GetServerList(c *gin.Context) {
 // @Router /uiApi/v1/service/serviceDetail/{id} [get]
 func GetServerDetail(c *gin.Context) {
 	appG := app.Gin{C: c}
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
-		"serverId":       "xxxxxx",
-		"serviceName":    "XX",
-		"serviceType":    "http",
-		"serviceAddress": "127.0.0.1",
-		"servicePort":    "300",
-		"serviceLimt":    200,
-		"serviceBreak":   30,
-		"serviceRules": [1]map[string]interface{}{
-			{
-				"url":         "/api",
-				"pathReWrite": `{/api:''}`,
-			},
-		},
-		"useConsulId":         "xxxxx",
-		"useConsulTag":        "ss",
-		"useConsulCheckPath":  "/checkHealth",
-		"useConsulPort":       9990,
-		"useConsulInterval":   10,
-		"useConsulTimeout":    3,
-		"dingdingAccessToken": "xxxxxxxxxx",
-		"dingdingSercet":      "xxxxxxxxxx",
-		"dingdingList":        []int{18651892475},
-	})
+	var (
+		serviceInfo InterfaceEntity.ServiceInfo
+	)
+	var serverId = c.Query("serverId")
+	if err := service.DB.Find(&serviceInfo).Where("service_id =?", serverId).Error; err != nil {
+	}
+	fmt.Println(serviceInfo)
+	appG.Response(http.StatusOK, e.SUCCESS, serviceInfo)
 }
 
 // @Tags  服务模块
@@ -114,13 +100,13 @@ func GetServerDetail(c *gin.Context) {
 // @Produce  json
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/service/addService [post]
-//汇总实体类
 func ImportService(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
 		serviceInfo  InterfaceEntity.ServiceInfo = InterfaceEntity.ServiceInfo{}
 		DingdingList string                      = ""
 		ServiceRules string                      = ""
+		deleteFlag   int                         = 0
 	)
 	var body = Utils.GetJsonBody(c)
 	var dingdingList = body["dingdingList"].([]interface{})
@@ -131,7 +117,7 @@ func ImportService(c *gin.Context) {
 	var serviceRules = body["serviceRules"].([]interface{})
 	for i := 0; i < len((serviceRules)); i++ {
 		var service = serviceRules[i].(map[string]interface{})
-		ServiceRules = ServiceRules + "," + service["url"].(string) + "@" + service["pathReWrite"].(string)
+		ServiceRules = ServiceRules + "," + service["url"].(string) + ":" + service["pathReWrite"].(string)
 	}
 	servicePort, _ := strconv.Atoi(body["servicePort"].(string))
 	serviceLimit, _ := strconv.Atoi(body["serviceLimit"].(string))
@@ -140,6 +126,7 @@ func ImportService(c *gin.Context) {
 	useConsulInterval, _ := strconv.Atoi(body["useConsulInterval"].(string))
 	useConsulTimeout, _ := strconv.Atoi(body["useConsulTimeout"].(string))
 	serviceInfo = InterfaceEntity.ServiceInfo{
+		DeleteFlag:          deleteFlag,
 		ServerId:            Utils.GenerateUUID(),
 		ServiceName:         body["serviceName"].(string),
 		ServiceType:         body["serviceType"].(string),
@@ -158,10 +145,15 @@ func ImportService(c *gin.Context) {
 		DingdingSecret:      body["dingdingSecret"].(string),
 		DingdingList:        DingdingList,
 	}
-	if err := service.DB.Create(&serviceInfo).Error; err != nil {
+	tx := service.DB.Begin()
+	if err := tx.Create(&serviceInfo).Error; err != nil {
+		fmt.Println(err)
+		tx.Rollback()
+		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
+	} else {
+		tx.Commit()
+		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}
-
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 }
 
 // @Tags  服务模块
@@ -186,5 +178,16 @@ func EditService(c *gin.Context) {
 // @Router /uiApi/v1/service/deleteService [post]
 func DeleteService(c *gin.Context) {
 	appG := app.Gin{C: c}
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
+	var (
+		serviceInfo InterfaceEntity.ServiceInfo
+	)
+	var body = Utils.GetJsonBody(c)
+	fmt.Println(body["serverId"].(string))
+	// 数据物理删除
+	if err := service.DB.Where("server_id = ?", body["serverId"].(string)).Delete(&serviceInfo).Error; err != nil {
+		fmt.Println(err)
+		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
+	} else {
+		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
+	}
 }

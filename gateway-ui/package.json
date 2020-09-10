@@ -8,12 +8,8 @@
   },
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "start": "cross-env NODE_ENV=dev nodemon ./app/app.js --max_semi_space_size=256",
-    "dev": "cross-env NODE_ENV=dev node ./app/app.js",
-    "api": "apidoc -i app/controller/ -o doc/api",
-    "apiUI": "node ./doc/app.js"
+    "build": "node clear.js && vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "amqplib": "^0.6.0",

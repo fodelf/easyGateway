@@ -4,11 +4,11 @@
  * @Author: pym
  * @Date: 2020-09-06 15:56:41
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-09 17:40:06
+ * @LastEditTime: 2020-09-10 09:10:15
 -->
 <template>
-<div>
   <el-form :model="ruleForm" :rules='serviceRules' :inline="true" class='projectAdd' label-width='150px' label-position="left" :disabled="$route.query.type=='check'">
+    <div @click='cancel' style="width:80px"><i class="el-icon-d-arrow-left" style="color:white;font-size:14px;cursor: pointer;margin-bottom: 20px;"   >返回</i></div>
     <el-tabs v-model="baseInfo">
       <el-tab-pane label="基本信息" name="baseInfo"></el-tab-pane>
     </el-tabs>
@@ -150,13 +150,9 @@
      <el-form-item>
         <el-button type="primary" @click="saveRule" v-if="$route.query.type === 'add'">保存</el-button>
         <el-button type="primary" @click="updateRule" v-if="$route.query.type === 'edit'">保存</el-button>
-        <el-button type='default' @click='cancel'>取消</el-button>
+        <el-button type='default' @click='cancel' v-if="$route.query.type != 'check'">取消</el-button>
      </el-form-item>
   </el-form>
-    <!-- <el-button type="primary" @click="saveRule" v-if="$route.query.type === 'add'">保存</el-button>
-    <el-button type="primary" @click="updateRule" v-if="$route.query.type === 'edit'">保存</el-button>
-    <el-button type='default' @click='cancel'>取消</el-button> -->
-</div>
 </template>
 
 <script>

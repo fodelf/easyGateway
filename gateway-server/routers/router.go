@@ -5,10 +5,11 @@ import (
 
 	_ "gateway/docs"
 
+	// proxy "gateway/middleware/proxy"
+	v1 "gateway/routers/api/v1"
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-	v1 "gateway/routers/api/v1"
 )
 
 // InitRouter initialize routing information
@@ -16,12 +17,13 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-
+	// r.Use(proxy.ReverseProxy())
+	// proxyMiddle := r.Group("/*")
+	// proxyMiddle.Use(proxy.ReverseProxy())
 	r.LoadHTMLGlob("web/*.html")          // 添加入口index.html
 	r.LoadHTMLFiles("web/static/*/*")     // 添加资源路径
 	r.Static("/static", "web/static")     // 添加资源路径
 	r.StaticFile("/ui", "web/index.html") // 前端接口
-
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	apiRoot := r.Group("/uiApi/v1")
 	apiRoot.Use()
@@ -52,7 +54,7 @@ func InitRouter() *gin.Engine {
 		//新增服务
 		serviceApi.POST("/addService", v1.ImportService)
 		//查询服务明细
-		serviceApi.GET("/serviceDetail/:serverId", v1.GetServerDetail)
+		serviceApi.GET("/serviceDetail", v1.GetServerDetail)
 		//编辑服务
 		serviceApi.POST("/editService", v1.EditService)
 		//编辑服务

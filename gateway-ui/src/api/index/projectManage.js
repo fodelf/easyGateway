@@ -3,8 +3,8 @@
  * @Author: 吴文周
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-21 22:21:31
- * @LastEditors: pym
- * @LastEditTime: 2020-09-06 21:38:13
+ * @LastEditors: 吴文周
+ * @LastEditTime: 2020-09-10 09:34:16
  */
 import request from '@/utils/request'
 
@@ -36,7 +36,7 @@ export function addService(params) {
 }
 export function serviceDetail(id) {
   return request({
-    url: '/uiApi/v1/service/serviceDetail/{'+id+'}',
+    url: `/uiApi/v1/service/serviceDetail?serverId=${id}`,
     method: 'GET'
   })
 }
