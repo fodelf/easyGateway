@@ -5,7 +5,7 @@ import (
 
 	_ "gateway/docs"
 
-	// proxy "gateway/middleware/proxy"
+	proxy "gateway/middleware/proxy"
 	v1 "gateway/routers/api/v1"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -17,7 +17,7 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	// r.Use(proxy.ReverseProxy())
+	r.Use(proxy.ReverseProxy())
 	// proxyMiddle := r.Group("/*")
 	// proxyMiddle.Use(proxy.ReverseProxy())
 	r.LoadHTMLGlob("web/*.html")          // 添加入口index.html
