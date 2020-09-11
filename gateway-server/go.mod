@@ -21,7 +21,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/creack/pty v1.1.11 // indirect
 	github.com/fatih/color v1.9.0 // indirect
-	github.com/fatih/structs v1.1.0 // indirect
+	github.com/fatih/structs v1.1.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-ini/ini v1.32.1-0.20180214101753-32e4be5f41bb

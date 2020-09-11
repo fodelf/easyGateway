@@ -53,7 +53,7 @@ func GetTagName(structName interface{}) []string {
 	return result
 }
 func GetStructValue(obj interface{}, name string) int64 {
-	immutable := reflect.ValueOf(obj)
+	immutable := reflect.ValueOf(&obj)
 	val := immutable.FieldByName(name).Int()
 	return val
 }
@@ -80,4 +80,30 @@ func GenerateUUID() string {
 	withLineUUID := uuid.NewV4().String()
 	uuidList := strings.Split(withLineUUID, "-")
 	return strings.Join(uuidList, "")
+}
+
+func JsonToMap(jsonStr string) (map[string]string, error) {
+	m := make(map[string]string)
+	err := json.Unmarshal([]byte(jsonStr), &m)
+	if err != nil {
+		fmt.Printf("Unmarshal with error: %+v\n", err)
+		return nil, err
+	}
+
+	for k, v := range m {
+		fmt.Printf("%v: %v\n", k, v)
+	}
+
+	return m, nil
+}
+
+func GetKeys(m map[string]string) []string {
+	// 数组默认长度为map长度,后面append时,不需要重新申请内存和拷贝,效率较高
+	j := 0
+	keys := make([]string, len(m))
+	for k := range m {
+		keys[j] = k
+		j++
+	}
+	return keys
 }

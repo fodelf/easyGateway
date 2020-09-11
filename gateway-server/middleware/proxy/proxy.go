@@ -16,42 +16,42 @@ import (
 var ProxyConfig []map[string]interface{}
 
 func grepProxy(url string) map[string]interface{} {
-	fmt.Println(url)
 	var (
 		ServerConfig map[string]interface{} = map[string]interface{}{
 			"flag": true,
 		}
 		urlkey string
 	)
-	ProxyConfig = append(ProxyConfig, map[string]interface{}{
-		"serviceAddress": "127.0.0.1",
-		"prot":           3000,
-		"serviceRules": []map[string]interface{}{
-			{
-				"url":         "/api",
-				"pathReWrite": `{/api:''}`,
-			},
-		},
-	})
+	// ProxyConfig = append(ProxyConfig, map[string]interface{}{
+	// 	"serviceAddress": "127.0.0.1",
+	// 	"prot":           3000,
+	// 	"serviceRules": []map[string]interface{}{
+	// 		{
+	// 			"url":         "/api",
+	// 			"pathReWrite": `{/api:''}`,
+	// 		},
+	// 	},
+	// })
 	for i := 0; i < len(ProxyConfig); i++ {
 		var child = ProxyConfig[i]
 		var rules = child["serviceRules"].([]map[string]interface{})
-		fmt.Println(rules)
 		for k := 0; k < len(rules); k++ {
 			var rule = rules[k]
 			urlkey = rule["url"].(string)
-			fmt.Println(urlkey)
-			fmt.Println(url)
-			// prot, _ := strconv.Atoi(child["prot"])
-			// urlkey = urlkey.(string)
 			if strings.HasPrefix(url, urlkey) {
+				var pathReWrite = rule["pathReWrite"].(map[string]interface{})
+				fmt.Println("---------------------")
+				fmt.Println(pathReWrite)
 				ServerConfig = map[string]interface{}{
 					"flag":           false,
 					"serviceAddress": child["serviceAddress"].(string),
-					"prot":           child["prot"].(int),
-					"serviceRules": map[string]interface{}{
-						"url":         rule["url"].(string),
-						"pathReWrite": rule["pathReWrite"].(string),
+					"servicePort":    child["servicePort"].(int),
+					"serviceRule": map[string]interface{}{
+						"url": urlkey,
+						"pathReWrite": map[string]interface{}{
+							"oldPath": pathReWrite["oldPath"].(string),
+							"newPath": pathReWrite["newPath"].(string),
+						},
 					},
 				}
 				break
@@ -62,33 +62,27 @@ func grepProxy(url string) map[string]interface{} {
 }
 
 func ReverseProxy() gin.HandlerFunc {
-	fmt.Println("0000")
 	return func(c *gin.Context) {
 		// fmt.Println(c.Request.URL)
-		// var FullPath  string 
+		// var FullPath  string
 		// var ur,_ = url.Parse(c.Request.URL)
 		urlPath := c.Request.URL.String()
-		fmt.Println(urlPath)
 		var proxyObj = grepProxy(urlPath)
-		fmt.Println(proxyObj)
 		if proxyObj["flag"].(bool) {
 			c.Next()
 			return
 		}
-		fmt.Println("22222")
-		// target := "http://172.23.0.187:9990/"
-		// u, err := url.Parse(target)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
 		var serviceAddress = proxyObj["serviceAddress"].(string)
-		// var prot = proxyObj["prot"].(string)
-		var prot = strconv.Itoa(proxyObj["prot"].(int))
+		var prot = strconv.Itoa(proxyObj["servicePort"].(int))
+		var serviceRule = proxyObj["serviceRule"].(map[string]interface{})
+		var pathReWrite = serviceRule["pathReWrite"].(map[string]interface{})
+		var oldPath = pathReWrite["oldPath"].(string)
+		var newPath = pathReWrite["newPath"].(string)
 		var Host = serviceAddress + ":" + prot
 		director := func(req *http.Request) {
 			req.URL.Scheme = "http"
 			req.URL.Host = Host
-			req.URL.Path = "/xx"
+			req.URL.Path = strings.Replace(urlPath, oldPath, newPath, 1)
 		}
 		//更改内容
 		// modifyFunc := func(resp *http.Response) error {
@@ -139,5 +133,6 @@ func ReverseProxy() gin.HandlerFunc {
 		proxy := &httputil.ReverseProxy{Director: director, ErrorHandler: errFunc}
 		proxy.ServeHTTP(c.Writer, c.Request)
 		c.Next()
+		// return
 	}
 }

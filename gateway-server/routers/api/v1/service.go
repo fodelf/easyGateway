@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	proxy "gateway/middleware/proxy"
 	"gateway/pkg/e"
 
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
@@ -29,11 +30,15 @@ func GetServerSum(c *gin.Context) {
 		count       int                      = 0
 		serverList  []map[string]interface{} = []map[string]interface{}{}
 	)
-	tx := service.DB.Begin()
-	if err := tx.Model(&serviceInfo).Count(&sum).Error; err != nil {
+	// var tx = service.DB.Begin()
+	// tx.Close()
+	if err := service.DB.Model(&serviceInfo).Count(&sum).Error; err != nil {
 	}
-	if err := tx.Model(&serviceInfo).Where("service_type =?", "http").Count(&count).Error; err != nil {
+	// tx.Close()
+	// var tx1 = service.DB.Begin()
+	if err := service.DB.Model(&serviceInfo).Where("service_type =?", "http").Count(&count).Error; err != nil {
 	}
+	// tx1.Close()
 	var serviceInterface = map[string]interface{}{
 		"label": "http",
 		"count": count,
@@ -64,10 +69,12 @@ func GetServerList(c *gin.Context) {
 	var (
 		serverList []InterfaceEntity.ServiceInfo = []InterfaceEntity.ServiceInfo{}
 	)
-	if err := service.DB.Find(&serverList).Where("delete_flag =?", 0).Error; err != nil {
+	var tx = service.DB.Begin()
+	if err := tx.Find(&serverList).Where("delete_flag =?", 0).Error; err != nil {
 
 	} else {
 	}
+	// tx.Close()
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
 		"serverList": serverList,
 	})
@@ -103,12 +110,23 @@ func GetServerDetail(c *gin.Context) {
 func ImportService(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
-		serviceInfo  InterfaceEntity.ServiceInfo = InterfaceEntity.ServiceInfo{}
-		DingdingList string                      = ""
-		ServiceRules string                      = ""
-		deleteFlag   int                         = 0
+		serviceInfo       InterfaceEntity.ServiceInfo = InterfaceEntity.ServiceInfo{}
+		DingdingList      string                      = ""
+		ServiceRules      string                      = ""
+		deleteFlag        int                         = 0
+		SingleProxyConfig map[string]interface{}      = map[string]interface{}{
+			"serviceAddress": "",
+			"servicePort":    0,
+			"serviceRules":   []map[string]interface{}{},
+		}
 	)
 	var body = Utils.GetJsonBody(c)
+	servicePort, _ := strconv.Atoi(body["servicePort"].(string))
+	serviceLimit, _ := strconv.Atoi(body["serviceLimit"].(string))
+	serviceBreak, _ := strconv.Atoi(body["serviceBreak"].(string))
+	useConsulPort, _ := strconv.Atoi(body["useConsulPort"].(string))
+	useConsulInterval, _ := strconv.Atoi(body["useConsulInterval"].(string))
+	useConsulTimeout, _ := strconv.Atoi(body["useConsulTimeout"].(string))
 	var dingdingList = body["dingdingList"].([]interface{})
 	for i := 0; i < len((dingdingList)); i++ {
 		var dingding = dingdingList[i].(string)
@@ -117,14 +135,30 @@ func ImportService(c *gin.Context) {
 	var serviceRules = body["serviceRules"].([]interface{})
 	for i := 0; i < len((serviceRules)); i++ {
 		var service = serviceRules[i].(map[string]interface{})
-		ServiceRules = ServiceRules + "," + service["url"].(string) + ":" + service["pathReWrite"].(string)
+		var oldPath = ""
+		var newPath = ""
+		m, err := Utils.JsonToMap(service["pathReWrite"].(string))
+		if err != nil {
+			fmt.Printf("Convert json to map failed with error: %+v\n", err)
+		} else {
+			var keys = Utils.GetKeys(m)
+			oldPath = keys[0]
+			newPath = m[oldPath]
+		}
+		if i == 0 {
+			ServiceRules = service["url"].(string) + ";" + oldPath + ";" + newPath
+		} else {
+			ServiceRules = ServiceRules + "," + service["url"].(string) + ";" + oldPath + ";" + newPath
+		}
+		var rule = map[string]interface{}{
+			"url": service["url"].(string),
+			"pathReWrite": map[string]interface{}{
+				"oldPath": oldPath,
+				"newPath": newPath,
+			},
+		}
+		SingleProxyConfig["serviceRules"] = append(SingleProxyConfig["serviceRules"].([]map[string]interface{}), rule)
 	}
-	servicePort, _ := strconv.Atoi(body["servicePort"].(string))
-	serviceLimit, _ := strconv.Atoi(body["serviceLimit"].(string))
-	serviceBreak, _ := strconv.Atoi(body["serviceBreak"].(string))
-	useConsulPort, _ := strconv.Atoi(body["useConsulPort"].(string))
-	useConsulInterval, _ := strconv.Atoi(body["useConsulInterval"].(string))
-	useConsulTimeout, _ := strconv.Atoi(body["useConsulTimeout"].(string))
 	serviceInfo = InterfaceEntity.ServiceInfo{
 		DeleteFlag:          deleteFlag,
 		ServerId:            Utils.GenerateUUID(),
@@ -145,12 +179,18 @@ func ImportService(c *gin.Context) {
 		DingdingSecret:      body["dingdingSecret"].(string),
 		DingdingList:        DingdingList,
 	}
+	fmt.Println(serviceInfo)
 	tx := service.DB.Begin()
 	if err := tx.Create(&serviceInfo).Error; err != nil {
 		fmt.Println(err)
 		tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
 	} else {
+		// tx.Close()
+		SingleProxyConfig["serviceAddress"] = body["serviceAddress"].(string)
+		// servicePort, _ := strconv.Atoi(body["servicePort"].(string))
+		SingleProxyConfig["servicePort"] = servicePort
+		proxy.ProxyConfig = append(proxy.ProxyConfig, SingleProxyConfig)
 		tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}

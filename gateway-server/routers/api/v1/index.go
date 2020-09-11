@@ -3,13 +3,13 @@ package v1
 import (
 	service "gateway/database"
 	InterfaceEntity "gateway/models/InterfaceEntity"
+	"gateway/pkg/e"
+	Utils "gateway/utils"
 	"net/http"
 	Time "time"
 
-	"gateway/pkg/e"
-	Utils "gateway/utils"
-
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
+	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,11 +30,14 @@ func GetSum(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var sumInfo InterfaceEntity.SumInfo
 	// service.DB.Begin()
+	// var tx = service.DB.Begin()
 	if err := service.DB.Find(&sumInfo).Error; err != nil {
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
+		// tx.Rollback()
 	} else {
 		appG.Response(http.StatusOK, e.SUCCESS, sumInfo)
 	}
+	// tx.Commit()
 }
 
 // @Tags  首页模块
@@ -50,11 +53,13 @@ func GetCharts(c *gin.Context) {
 	var (
 		charts      []InterfaceEntity.ChartInfo
 		timeList    []string = []string{}
-		totalList   []int64  = []int64{}
-		successList []int64  = []int64{}
-		failList    []int64  = []int64{}
+		totalList   []int    = []int{}
+		successList []int    = []int{}
+		failList    []int    = []int{}
 	)
+	// var tx = service.DB.Begin()
 	if err := service.DB.Limit(7).Order("chart_id DESC").Find(&charts).Error; err != nil {
+		// tx.Rollback()
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 	} else {
 		for i, j := 0, len(charts)-1; i < j; i, j = i+1, j-1 {
@@ -63,10 +68,11 @@ func GetCharts(c *gin.Context) {
 		for i := 0; i < len(charts); i++ {
 			// t := reflect.TypeOf(charts[i])
 			// immutable := reflect.ValueOf(charts[i])
-			total := Utils.GetStructValue(charts[i], "Total")
-			success := Utils.GetStructValue(charts[i], "Success")
-			fail := Utils.GetStructValue(charts[i], "Fail")
-			time := Utils.GetStructValueString(charts[i], "Time")
+			var chartInfo = structs.Map(charts[i])
+			var total = chartInfo["Total"].(int)
+			var success = chartInfo["Success"].(int)
+			var fail = chartInfo["Fail"].(int)
+			var time = chartInfo["Time"].(string)
 			totalList = append(totalList, total)
 			successList = append(successList, success)
 			failList = append(failList, fail)
@@ -106,6 +112,7 @@ func GetCharts(c *gin.Context) {
 			"failList":    failList,
 		})
 	}
+	// tx.Commit()
 }
 
 // @Tags  首页模块
@@ -119,19 +126,22 @@ func GetActualTime(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
 		charts     []InterfaceEntity.ChartInfo
-		total      int64
-		fail       int64
-		success    int64
+		total      int
+		fail       int
+		success    int
 		time       string
-		percent    int64
+		percent    int
 		todayState string
 	)
+	// var tx = service.DB.Begin()
 	if err := service.DB.Limit(1).Order("chart_id DESC").Find(&charts).Error; err != nil {
+		// tx.Rollback()
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 	} else {
-		total = Utils.GetStructValue(charts[0], "Total")
-		success = Utils.GetStructValue(charts[0], "Success")
-		fail = Utils.GetStructValue(charts[0], "Fail")
+		var chartInfo = structs.Map(charts[0])
+		total = chartInfo["Total"].(int)
+		success = chartInfo["Success"].(int)
+		fail = chartInfo["Fail"].(int)
 		time = Time.Now().Format("2006/01/02")
 		if total != 0 {
 			percent = (fail / total)
@@ -158,6 +168,7 @@ func GetActualTime(c *gin.Context) {
 			},
 		})
 	}
+	// tx.Commit()
 }
 
 // @Tags  首页模块
@@ -173,12 +184,15 @@ func GetWarningList(c *gin.Context) {
 		warnings   []InterfaceEntity.WarningInfo
 		resultList []string = []string{}
 	)
+	// var tx = service.DB.Begin()
 	if err := service.DB.Limit(7).Order("warning_id DESC").Find(&warnings).Error; err != nil {
+		// tx.Rollback()
 		// appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
 			"warningList": resultList,
 		})
 	} else {
+		// tx.Commit()
 		for i, j := 0, len(warnings)-1; i < j; i, j = i+1, j-1 {
 			warnings[i], warnings[j] = warnings[j], warnings[i]
 		}
@@ -193,4 +207,5 @@ func GetWarningList(c *gin.Context) {
 			"warningList": resultList,
 		})
 	}
+	// defer tx.Close()
 }
