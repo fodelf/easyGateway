@@ -103,11 +103,23 @@ export default {
       })
     },
     saveRule() {
-      let params = this.ruleForm
-      addService(params).then(res=>{
-        this.$router.push({
-          name:'projectManage'
-        })
+      this.$refs["ruleForm"].validate((valid) => {
+        if (valid) {
+          let params = this.ruleForm
+          // this.ruleForm.servicePort = this.ruleForm.servicePort*1
+          // this.ruleForm.serviceLimit = this.ruleForm.serviceLimit*1
+          // this.ruleForm.serviceBreak = this.ruleForm.serviceBreak*1
+          // this.ruleForm.useConsulPort = this.ruleForm.useConsulPort*1
+          // this.ruleForm.useConsulInterval = this.ruleForm.useConsulInterval*1
+          // this.ruleForm.useConsulTimeout = this.ruleForm.useConsulTimeout*1
+          addService(params).then(res=>{
+            this.$router.push({
+              name:'projectManage'
+            })
+          })
+        } else {
+          return false
+        }
       })
     },
     initDetail() {

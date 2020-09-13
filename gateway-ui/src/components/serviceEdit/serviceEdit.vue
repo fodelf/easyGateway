@@ -18,7 +18,7 @@
     <el-form :model='serviceForm' 
       label-width="100px"
       label-position="left" :rules="rules">
-      <el-form-item label='ip' prop="address">
+      <el-form-item label='地址' prop="address">
         <el-input type='text' v-model='serviceForm.address'></el-input>
       </el-form-item>
       <el-form-item label='端口号'>
@@ -28,7 +28,7 @@
         <el-input type='text' v-model='serviceForm.userName'></el-input>
       </el-form-item>
        <el-form-item label='密码' v-if='serviceForm.type === "rabbitMq"'>
-        <el-input type='password' v-model='serviceForm.password'></el-input>
+        <el-input type='text' v-model='serviceForm.password'></el-input>
       </el-form-item>
       <el-row type="flex" justify="end">
         <el-form-item>
@@ -49,7 +49,7 @@ export default {
       serviceForm:{},
       rules:{
         address:[
-          {required:true,message:'请输入ip',trigger:'blur'}
+          {required:true,message:'请输入地址',trigger:'blur'}
         ]
       }
     }

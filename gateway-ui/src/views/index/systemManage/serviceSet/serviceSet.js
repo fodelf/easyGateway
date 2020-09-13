@@ -47,7 +47,7 @@ export default {
       if(obj.type === 'consul') {
         let params = {
           address: obj.address,
-          port:obj.port
+          port:obj.port*1
         }
         confirmConsul(params).then(res=>{
           this.$refs.editService.close()
@@ -56,9 +56,9 @@ export default {
       }else {
         let params = {
           address:obj.address,
-          port:obj.port,
+          port:obj.port*1,
           userName:obj.userName,
-          psssword:obj.psssword
+          password:obj.password
         }
         confirmMq(params).then(res=>{
           this.$refs.editService.close()

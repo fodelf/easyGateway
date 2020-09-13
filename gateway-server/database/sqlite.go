@@ -5,20 +5,22 @@ import (
 	proxy "gateway/middleware/proxy"
 	model "gateway/models"
 	InterfaceEntity "gateway/models/InterfaceEntity"
+	Utils "gateway/utils"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/fatih/structs"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	// _ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var DB *gorm.DB
 
 func ConnectDB() {
 	var err error
-	DB, err = gorm.Open("sqlite3", "gateway.db")
+	DB, err = gorm.Open("sqlite3", "file:gateway.db?_busy_timeout=9999999")
 	// defer DB.Close()
 	if err = DB.AutoMigrate(model.Models...).Error; nil != err {
 		log.Fatal("auto migrate tables failed: " + err.Error())
@@ -28,9 +30,38 @@ func ConnectDB() {
 		sumInfo      InterfaceEntity.SumInfo
 		chartInfo    InterfaceEntity.ChartInfo
 		serviceInfos []InterfaceEntity.ServiceInfo
+		consulInfo  InterfaceEntity.ConsulInfo
+		rabbitMQInfo  InterfaceEntity.RabbitMQInfo
 	)
 	if err := DB.Find(&sumInfo).Error; err != nil {
-		sumInfo := InterfaceEntity.SumInfo{
+		sumInfo = InterfaceEntity.SumInfo{
+			ServerSum:  0,
+			WarningSum: 0,
+			RequestSum: 0,
+			FailSum:    0,
+		}
+		DB.Create(&sumInfo)
+	}
+	if err := DB.Find(&consulInfo).Error; err != nil {
+		consulInfo = InterfaceEntity.ConsulInfo{
+			ConsulId:       Utils.GenerateUUID(),
+			ConsulAddress:    "",
+			Type:"consul",
+		}
+		DB.Create(&consulInfo)
+	}
+	if err := DB.Find(&rabbitMQInfo).Error; err != nil {
+		rabbitMQInfo := InterfaceEntity.RabbitMQInfo{
+			RabbitMQId:       Utils.GenerateUUID(),
+			RabbitMQAddress:"",
+			RabbitMQUserName:"",
+			RabbitMQPassword:"",
+			Type:"rabbitMq",
+		}
+		DB.Create(&rabbitMQInfo)
+	}
+	if err := DB.Find(&sumInfo).Error; err != nil {
+		sumInfo = InterfaceEntity.SumInfo{
 			ServerSum:  0,
 			WarningSum: 0,
 			RequestSum: 0,
@@ -62,17 +93,6 @@ func ConnectDB() {
 			fmt.Println(rules)
 			for i := 0; i < len(rules); i++ {
 				var ruleArray = strings.Split(rules[i], ";")
-				// var oldPath = ""
-				// var newPath = ""
-				fmt.Println(ruleArray)
-				// m, err := Utils.JsonToMap(ruleArray[1])
-				// if err != nil {
-				// 	fmt.Printf("Convert json to map failed with error: %+v\n", err)
-				// } else {
-				// 	var keys = Utils.GetKeys(m)
-				// 	oldPath = keys[0]
-				// 	newPath = m[oldPath]
-				// }
 				var rule = map[string]interface{}{
 					"url": "",
 					"pathReWrite": map[string]interface{}{
@@ -100,28 +120,12 @@ func ConnectDB() {
 
 				SingleProxyConfig["serviceRules"] = append(SingleProxyConfig["serviceRules"].([]map[string]interface{}), rule)
 			}
-			// var SingleProxyConfig map[string]interface{} = map[string]interface{}{
-			// 	// "serviceAddress": "",
-			// 	// "prot":           0,
-			// 	// "serviceRules":   []map[string]interface{}{},
-			// 	"serviceAddress": "172.23.0.187",
-			// 	"prot":           9990,
-			// 	"serviceRules": []map[string]interface{}{
-			// 		{
-			// 			"url": "/api/market/platform-api",
-			// 			"pathReWrite": map[string]interface{}{
-			// 				"oldPath": "/api/market/platform-api",
-			// 				"newPath": "",
-			// 			},
-			// 		},
-			// 	},
-			// }
 			proxy.ProxyConfig = append(proxy.ProxyConfig, SingleProxyConfig)
 		}
 	}
 
 	DB.DB().SetMaxIdleConns(1000)
 	DB.DB().SetMaxOpenConns(5000)
-	DB.DB().SetConnMaxLifetime(5 * time.Minute)
+	DB.DB().SetConnMaxLifetime(30 * time.Minute)
 	DB.LogMode(true)
 }

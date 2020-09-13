@@ -7,7 +7,7 @@
  * @LastEditTime: 2020-09-10 09:10:15
 -->
 <template>
-  <el-form :model="ruleForm" :rules='serviceRules' :inline="true" class='projectAdd' label-width='150px' label-position="left" :disabled="$route.query.type=='check'">
+  <el-form ref="ruleForm" :model="ruleForm" :rules='serviceRules' :inline="true" class='projectAdd' label-width='150px' label-position="left" :disabled="$route.query.type=='check'">
     <div @click='cancel' style="width:80px"><i class="el-icon-d-arrow-left" style="color:white;font-size:14px;cursor: pointer;margin-bottom: 20px;"   >返回</i></div>
     <el-tabs v-model="baseInfo">
       <el-tab-pane label="基本信息" name="baseInfo"></el-tab-pane>
@@ -34,7 +34,7 @@
       </el-col>
       <el-col :span='8'>
         <el-form-item label="服务端口">
-            <el-input type='text' v-model="ruleForm.servicePort" placeholder="示例：3000"></el-input>
+            <el-input type='text'  v-model.number="ruleForm.servicePort" placeholder="示例：3000"></el-input>
         </el-form-item>
       </el-col>
     </el-row>
@@ -65,8 +65,13 @@
           </el-form-item>
         </el-col>
         <el-col :span='8'>
-          <el-form-item label="路径重写">
-            <el-input type='text' v-model="item.pathReWrite" placeholder="示例：{'/api':''}"></el-input>
+          <el-form-item label="重写前缀">
+            <el-input type='text' v-model="item.pathReWriteBefore" placeholder="示例：/api"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span='8'>
+          <el-form-item label="重写地址">
+            <el-input type='text' v-model="item.pathReWriteUrl" placeholder="示例：/api"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span='6' v-if="ruleForm.serviceRules.length > 1">

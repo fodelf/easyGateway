@@ -2,11 +2,13 @@ package v1
 
 import (
 	"net/http"
-
+	service "gateway/database"
 	"github.com/gin-gonic/gin"
-
+	InterfaceEntity "gateway/models/InterfaceEntity"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
-	"github.com/EDDYCJY/go-gin-example/pkg/e"
+	"gateway/pkg/e"
+	"fmt"
+	// "strconv"
 )
 
 // @Tags  系统模块
@@ -18,9 +20,29 @@ import (
 // @Param port path string false "Port"  consul端口
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/system/editConsul [post]
+type ConsulPost struct {
+	ConsulAddress      string `json:"address"`
+	ConsulPort         int    `json:"port"`
+}
 func EditConsul(c *gin.Context) {
 	appG := app.Gin{C: c}
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
+	var consulPost ConsulPost
+	if err := c.ShouldBind(&consulPost); err != nil {
+        return
+	}
+	consulInfo := InterfaceEntity.ConsulInfo{
+		ConsulAddress:consulPost.ConsulAddress,
+		ConsulPort: consulPost.ConsulPort,
+	}
+	fmt.Println(consulInfo)
+	tx := service.DB.Begin()
+	if err := tx.Model(&InterfaceEntity.ConsulInfo{}).Update(&consulInfo).Error; err != nil {
+		tx.Rollback()
+		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
+	} else {
+		tx.Commit()
+		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
+	}
 }
 
 // @Tags  系统模块
@@ -34,9 +56,32 @@ func EditConsul(c *gin.Context) {
 // @Param psssword path string false "Psssword"  密码
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/system/editRabbitMq [post]
+type RabbitMqPost struct {
+	RabbitMqAddress      string `json:"address"`
+	RabbitMqPort         int    `json:"port"`
+	RabbitMqUserName         string    `json:"userName"`
+	RabbitMqPassWord       string    `json:"password"`
+}
 func EditRabbitMq(c *gin.Context) {
 	appG := app.Gin{C: c}
-	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
+	var rabbitMqPost RabbitMqPost
+	if err := c.ShouldBind(&rabbitMqPost); err != nil {
+        return
+	}
+	rabbitMq := InterfaceEntity.RabbitMQInfo{
+		RabbitMQAddress:rabbitMqPost.RabbitMqAddress,
+		RabbitMQPort  :rabbitMqPost.RabbitMqPort,
+		RabbitMQUserName  :rabbitMqPost.RabbitMqUserName,
+		RabbitMQPassword  :rabbitMqPost.RabbitMqPassWord,
+	}
+	tx := service.DB.Begin()
+	if err := tx.Model(&InterfaceEntity.RabbitMQInfo{}).Update(&rabbitMq).Error; err != nil {
+		tx.Rollback()
+		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
+	} else {
+		tx.Commit()
+		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
+	}
 }
 
 // @Tags  系统模块
@@ -48,16 +93,20 @@ func EditRabbitMq(c *gin.Context) {
 // @Router /uiApi/v1/system/systemDetail [get]
 func GetSystemDetail(c *gin.Context) {
 	appG := app.Gin{C: c}
+	var (
+		consulInfo  InterfaceEntity.ConsulInfo
+		rabbitMQInfo InterfaceEntity.RabbitMQInfo
+	)
+	if err := service.DB.First(&consulInfo).Error; err != nil {
+	} else {
+
+	}
+	if err := service.DB.First(&rabbitMQInfo).Error; err != nil {
+	} else {
+
+	}
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
-		"rabbitMq": map[string]interface{}{
-			"address":  "187:10:10;10",
-			"port":     "8500",
-			"userName": "xxx",
-			"psssword": "xxxxxxx",
-		},
-		"consul": map[string]interface{}{
-			"address": "187:10:10;10",
-			"port":    "8500",
-		},
+		"rabbitMq":rabbitMQInfo,
+		"consul":consulInfo,
 	})
 }
