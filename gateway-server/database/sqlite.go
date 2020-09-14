@@ -21,8 +21,8 @@ var DB *gorm.DB
 
 func ConnectDB() {
 	var err error
-	DB, err = gorm.Open("sqlite3", "file:gateway.db?_busy_timeout=9999999")
-	// defer DB.Close()
+	DB, err = gorm.Open("sqlite3", "database_file.sqlite?cache=shared&mode=rwc")
+	
 	if err = DB.AutoMigrate(model.Models...).Error; nil != err {
 		log.Fatal("auto migrate tables failed: " + err.Error())
 	}
@@ -127,9 +127,10 @@ func ConnectDB() {
 
 	// DB.DB().SetMaxIdleConns(1000)
 	// DB.DB().SetMaxOpenConns(5000)
-	DB.SingularTable(true)
-	DB.DB().SetMaxIdleConns(10)
-	DB.DB().SetMaxOpenConns(100)
+	defer DB.Close()
+	// DB.SingularTable(true)
+	// DB.DB().SetMaxIdleConns(10)
+	// DB.DB().SetMaxOpenConns(100)
 	// DB.DB().SetConnMaxLifetime(30 * time.Minute)
 	DB.LogMode(true)
 }

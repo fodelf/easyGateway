@@ -262,9 +262,15 @@ func ImportService(c *gin.Context) {
 		DingdingList:        DingdingList,
 	}
 	fmt.Println(serviceInfo)
+	tx := service.DB.Begin()
+	// if err != nil {
+	// 	fmt.Printf("begin. Exec error=%s", err)
+	// 	return
+	// }
+	defer tx.Commit()
 	// tx := service.DB.Begin()
 	// service.DB.Open()
-	if err := service.DB.Create(&serviceInfo).Error; err != nil {
+	if err := tx.Create(&serviceInfo).Error; err != nil {
 		fmt.Println(err)
 		// tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})

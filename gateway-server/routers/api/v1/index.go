@@ -7,7 +7,8 @@ import (
 	Utils "gateway/utils"
 	"net/http"
 	Time "time"
-
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/jinzhu/gorm"
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
@@ -31,13 +32,15 @@ func GetSum(c *gin.Context) {
 	var sumInfo InterfaceEntity.SumInfo
 	// service.DB.Begin()
 	// var tx = service.DB.Begin()
-	if err := service.DB.Find(&sumInfo).Error; err != nil {
+	DB, _ := gorm.Open("sqlite3", "database_file.sqlite?cache=shared&mode=rwc")
+	if err := DB.Find(&sumInfo).Error; err != nil {
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 		// tx.Rollback()
 	} else {
 		appG.Response(http.StatusOK, e.SUCCESS, sumInfo)
 	}
 	// tx.Commit()
+	DB.Close()
 }
 
 // @Tags  首页模块
@@ -58,7 +61,8 @@ func GetCharts(c *gin.Context) {
 		failList    []int    = []int{}
 	)
 	// var tx = service.DB.Begin()
-	if err := service.DB.Limit(7).Order("chart_id DESC").Find(&charts).Error; err != nil {
+	DB, _ := gorm.Open("sqlite3", "database_file.sqlite?cache=shared&mode=rwc")
+	if err := DB.Limit(7).Order("chart_id DESC").Find(&charts).Error; err != nil {
 		// tx.Rollback()
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 	} else {
@@ -113,6 +117,7 @@ func GetCharts(c *gin.Context) {
 		})
 	}
 	// tx.Commit()
+	DB.Close()
 }
 
 // @Tags  首页模块
@@ -133,11 +138,16 @@ func GetActualTime(c *gin.Context) {
 		percent    int
 		todayState string
 	)
-	// var tx = service.DB.Begin()
-	if err := service.DB.Limit(1).Order("chart_id DESC").Find(&charts).Error; err != nil {
+	// var tx = service.DB
+	DB, _ := gorm.Open("sqlite3", "database_file.sqlite?cache=shared&mode=rwc")
+	// tx.Close()
+	// defer tx.Commit()
+	if err := DB.Limit(1).Order("chart_id DESC").Find(&charts).Error; err != nil {
 		// tx.Rollback()
+		
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 	} else {
+		// tx.Close()
 		var chartInfo = structs.Map(charts[0])
 		total = chartInfo["Total"].(int)
 		success = chartInfo["Success"].(int)
@@ -169,6 +179,7 @@ func GetActualTime(c *gin.Context) {
 		})
 	}
 	// tx.Commit()
+	DB.Close()
 }
 
 // @Tags  首页模块
