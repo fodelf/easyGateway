@@ -3,17 +3,18 @@ package v1
 import (
 	"fmt"
 	service "gateway/database"
+	proxy "gateway/middleware/proxy"
 	InterfaceEntity "gateway/models/InterfaceEntity"
+	"gateway/pkg/e"
 	Utils "gateway/utils"
 	"net/http"
 	"strconv"
 	"strings"
-	proxy "gateway/middleware/proxy"
-	"gateway/pkg/e"
+
 	// "io/ioutil"
-	"reflect"
-	"github.com/fatih/structs"
+
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
+	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -98,7 +99,7 @@ func GetServerDetail(c *gin.Context) {
 	var serverId = c.Query("serverId")
 	if err := service.DB.Find(&serviceInfo).Where("service_id =?", serverId).Error; err != nil {
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
-	}else{
+	} else {
 		var serviceInfoMap = structs.Map(serviceInfo)
 		var serviceRules = serviceInfoMap["ServiceRules"].(string)
 		var rules = strings.Split(serviceRules, ",")
@@ -106,11 +107,11 @@ func GetServerDetail(c *gin.Context) {
 		for i := 0; i < len(rules); i++ {
 			var ruleArray = strings.Split(rules[i], ";")
 			var rule = map[string]interface{}{
-				"url":ruleArray[0],
-				"pathReWriteBefore":ruleArray[1],
-				"pathReWriteUrl":ruleArray[2],
+				"url":               ruleArray[0],
+				"pathReWriteBefore": ruleArray[1],
+				"pathReWriteUrl":    ruleArray[2],
 			}
-			showRules = append(showRules,rule)
+			showRules = append(showRules, rule)
 		}
 		// fmt.Println(serviceInfo)
 		serviceInfoMap["ServiceRules"] = showRules
@@ -139,26 +140,26 @@ func GetServerDetail(c *gin.Context) {
 			useConsulTimeout = ""
 		}
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
-			"serverId":           serviceInfoMap["ServerId"],
-			"serviceName":        serviceInfoMap["ServiceName"],
-			"serviceType":           serviceInfoMap["ServiceType"],
-			"serviceAddress":       serviceInfoMap["ServiceAddress"],
-			"servicePort":          servicePort,
-			"serviceLimit":         serviceLimit,
-			"serviceBreak":         serviceBreak,
-			"serviceRules":            serviceInfoMap["ServiceRules"],
-			"useConsulId":          serviceInfoMap["UseConsulId"],
-			"useConsulTag":         serviceInfoMap["UseConsulTag"],
-			"useConsulCheckPath":    serviceInfoMap["UseConsulCheckPath"],
-			"useConsulPort":         useConsulPort,
-			"useConsulInterval":     useConsulInterval,
-			"useConsulTimeout":      useConsulTimeout,
-			"dingdingAccessToken":   serviceInfoMap["DingdingAccessToken"],
-			"dingdingSecret":       serviceInfoMap["DingdingSecret"],
-			"dingdingList":          serviceInfoMap["DingdingList"],
+			"serverId":            serviceInfoMap["ServerId"],
+			"serviceName":         serviceInfoMap["ServiceName"],
+			"serviceType":         serviceInfoMap["ServiceType"],
+			"serviceAddress":      serviceInfoMap["ServiceAddress"],
+			"servicePort":         servicePort,
+			"serviceLimit":        serviceLimit,
+			"serviceBreak":        serviceBreak,
+			"serviceRules":        serviceInfoMap["ServiceRules"],
+			"useConsulId":         serviceInfoMap["UseConsulId"],
+			"useConsulTag":        serviceInfoMap["UseConsulTag"],
+			"useConsulCheckPath":  serviceInfoMap["UseConsulCheckPath"],
+			"useConsulPort":       useConsulPort,
+			"useConsulInterval":   useConsulInterval,
+			"useConsulTimeout":    useConsulTimeout,
+			"dingdingAccessToken": serviceInfoMap["DingdingAccessToken"],
+			"dingdingSecret":      serviceInfoMap["DingdingSecret"],
+			"dingdingList":        serviceInfoMap["DingdingList"],
 		})
 	}
-	
+
 }
 
 // @Tags  服务模块
@@ -168,50 +169,62 @@ func GetServerDetail(c *gin.Context) {
 // @Produce  json
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/service/addService [post]
+type ImportServiceBody struct {
+	ServiceName         string                   `json:"serviceName"`
+	ServiceType         string                   `json:"serviceType"`
+	ServiceAddress      string                   `json:"serviceAddress"`
+	ServicePort         int                      `json:"servicePort"`
+	ServiceLimit        int                      `json:"serviceLimit"`
+	ServiceBreak        int                      `json:"serviceBreak"`
+	ServiceRules        []map[string]interface{} `json:"serviceRules"`
+	UseConsulId         string                   `json:"useConsulId"`
+	UseConsulTag        string                   `json:"useConsulTag"`
+	UseConsulCheckPath  string                   `json:"useConsulCheckPath"`
+	UseConsulPort       int                      `json:"useConsulPort"`
+	UseConsulInterval   int                      `json:"useConsulInterval"`
+	UseConsulTimeout    int                      `json:"useConsulTimeout"`
+	DingdingAccessToken string                   `json:"dingdingAccessToken"`
+	DingdingSecret      string                   `json:"dingdingSecret"`
+	DingdingList        []string                 `json:"dingdingList"`
+}
+
 func ImportService(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
 		// serviceInfo       InterfaceEntity.ServiceInfo = InterfaceEntity.ServiceInfo{}
-		DingdingList      string                      = ""
-		ServiceRules      string                      = ""
-		deleteFlag        int                         = 0
-		SingleProxyConfig map[string]interface{}      = map[string]interface{}{
+		DingdingList      string
+		ServiceRules      string                 = ""
+		deleteFlag        int                    = 0
+		SingleProxyConfig map[string]interface{} = map[string]interface{}{
 			"serviceAddress": "",
 			"servicePort":    80,
 			"serviceRules":   []map[string]interface{}{},
 		}
-		servicePort int
-		serviceLimit int
-		serviceBreak int
-		useConsulPort int
+		servicePort       int
+		serviceLimit      int
+		serviceBreak      int
+		useConsulPort     int
 		useConsulInterval int
-		useConsulTimeout int
-		dingdingList []interface{}
-		serviceRules []interface{}
+		useConsulTimeout  int
+		dingdingList      []string
+		serviceRules      []map[string]interface{}
+		importServiceBody ImportServiceBody
 	)
-	var body = Utils.GetJsonBody(c)
-	servicePort = int(body["servicePort"].(float64))
-	serviceLimit, _ = strconv.Atoi(body["serviceLimit"].(string))
-	serviceBreak, _ = strconv.Atoi(body["serviceBreak"].(string))
-	useConsulPort, _ = strconv.Atoi(body["useConsulPort"].(string))
-	useConsulInterval, _ = strconv.Atoi(body["useConsulInterval"].(string))
-	useConsulTimeout, _ = strconv.Atoi(body["useConsulTimeout"].(string))
-	if reflect.TypeOf(body["dingdingList"]) == nil{
-
-	}else{
-		dingdingList = body["dingdingList"].([]interface{})
-	}
-	if reflect.TypeOf(body["serviceRules"]) == nil{
-
-	}else{
-		serviceRules = body["serviceRules"].([]interface{})
-	}
+	c.ShouldBind(&importServiceBody)
+	servicePort = importServiceBody.ServicePort
+	serviceLimit = importServiceBody.ServiceLimit
+	serviceBreak = importServiceBody.ServiceBreak
+	useConsulPort = importServiceBody.UseConsulPort
+	useConsulInterval = importServiceBody.UseConsulInterval
+	useConsulTimeout = importServiceBody.UseConsulTimeout
+	dingdingList = importServiceBody.DingdingList
+	serviceRules = importServiceBody.ServiceRules
 	for i := 0; i < len((dingdingList)); i++ {
-		var dingding = dingdingList[i].(string)
+		var dingding = dingdingList[i]
 		DingdingList = DingdingList + "," + dingding
 	}
 	for i := 0; i < len((serviceRules)); i++ {
-		var service = serviceRules[i].(map[string]interface{})
+		var service = serviceRules[i]
 		var oldPath = service["pathReWriteBefore"].(string)
 		var newPath = service["pathReWriteUrl"].(string)
 		if i == 0 {
@@ -231,33 +244,33 @@ func ImportService(c *gin.Context) {
 	serviceInfo := &InterfaceEntity.ServiceInfo{
 		DeleteFlag:          deleteFlag,
 		ServerId:            Utils.GenerateUUID(),
-		ServiceName:         body["serviceName"].(string),
-		ServiceType:         body["serviceType"].(string),
-		ServiceAddress:      body["serviceAddress"].(string),
+		ServiceName:         importServiceBody.ServiceName,
+		ServiceType:         importServiceBody.ServiceType,
+		ServiceAddress:      importServiceBody.ServiceAddress,
 		ServicePort:         servicePort,
 		ServiceLimit:        serviceLimit,
 		ServiceBreak:        serviceBreak,
 		ServiceRules:        ServiceRules,
-		UseConsulId:         body["useConsulId"].(string),
-		UseConsulTag:        body["useConsulTag"].(string),
-		UseConsulCheckPath:  body["useConsulCheckPath"].(string),
+		UseConsulId:         importServiceBody.UseConsulId,
+		UseConsulTag:        importServiceBody.UseConsulTag,
+		UseConsulCheckPath:  importServiceBody.UseConsulCheckPath,
 		UseConsulPort:       useConsulPort,
 		UseConsulInterval:   useConsulInterval,
 		UseConsulTimeout:    useConsulTimeout,
-		DingdingAccessToken: body["dingdingAccessToken"].(string),
-		DingdingSecret:      body["dingdingSecret"].(string),
+		DingdingAccessToken: importServiceBody.DingdingAccessToken,
+		DingdingSecret:      importServiceBody.DingdingSecret,
 		DingdingList:        DingdingList,
 	}
 	fmt.Println(serviceInfo)
 	// tx := service.DB.Begin()
+	// service.DB.Open()
 	if err := service.DB.Create(&serviceInfo).Error; err != nil {
 		fmt.Println(err)
 		// tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
 	} else {
 		// tx.Close()
-		SingleProxyConfig["serviceAddress"] = body["serviceAddress"].(string)
-		// servicePort, _ := strconv.Atoi(body["servicePort"].(string))
+		SingleProxyConfig["serviceAddress"] = importServiceBody.ServiceAddress
 		SingleProxyConfig["servicePort"] = servicePort
 		proxy.ProxyConfig = append(proxy.ProxyConfig, SingleProxyConfig)
 		// tx.Commit()
@@ -276,8 +289,8 @@ func EditService(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
 		// serviceInfo       InterfaceEntity.ServiceInfo = InterfaceEntity.ServiceInfo{}
-		DingdingList      string                      = ""
-		ServiceRules      string                      = ""
+		DingdingList string = ""
+		ServiceRules string = ""
 		// SingleProxyConfig map[string]interface{}      = map[string]interface{}{
 		// 	"serviceAddress": "",
 		// 	"servicePort":    80,
@@ -336,7 +349,7 @@ func EditService(c *gin.Context) {
 	}
 	fmt.Println(serviceInfo)
 	service.DB.Close()
-	if err := service.DB.Model(&InterfaceEntity.ServiceInfo{}).Where("server_id =" ,body["ServerId"].(string)).Update(&serviceInfo).Error; err != nil {
+	if err := service.DB.Model(&InterfaceEntity.ServiceInfo{}).Where("server_id =", body["ServerId"].(string)).Update(&serviceInfo).Error; err != nil {
 		fmt.Println(err)
 		// tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
@@ -349,7 +362,7 @@ func EditService(c *gin.Context) {
 		// tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}
-}	
+}
 
 // @Tags  服务模块
 // @Summary 删除服务
@@ -359,33 +372,17 @@ func EditService(c *gin.Context) {
 // @Param serviceId path string true "ServiceId"  删除服务的id
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/service/deleteService [post]
-type Service1 struct {
-	ServerId     string  `json:"serverId"`
+type DeleteServiceBody struct {
+	ServerId string `json:"serverId"`
 }
+
 func DeleteService(c *gin.Context) {
 	appG := app.Gin{C: c}
-	// var (
-	// 	serviceInfo InterfaceEntity.ServiceInfo
-	// )
-	// var serverId = c.Request.FormValue("serverId")
-	// data, _ := ioutil.ReadAll(c.Request.Body)
-	// fmt.Println("xxxxxxxx")
-	// fmt.Println(data)
-	var ser Service1
-	// fmt.Println(c.)
-	// // If `GET`, only `Form` binding engine (`query`) used.
-	// // 如果是Get，那么接收不到请求中的Post的数据？？
-	// // 如果是Post, 首先判断 `content-type` 的类型 `JSON` or `XML`, 然后使用对应的绑定器获取数据.
-	// // See more at https://github.com/gin-gonic/gin/blob/master/binding/binding.go#L48
-	// if c.ShouldBind(&ser) == nil {
-	// 	fmt.Println(ser)
-	// }
-	// var body = Utils.GetJsonBody(c)
+	var ser DeleteServiceBody
 	c.ShouldBind(&ser)
-	fmt.Println(ser.ServerId)
 	// 数据物理删除
 	// tx := service.DB.Begin()
-	if err := service.DB.Where("server_id = ?",ser.ServerId).Delete(&InterfaceEntity.ServiceInfo{}).Error; err != nil {
+	if err := service.DB.Where("server_id = ?", ser.ServerId).Delete(&InterfaceEntity.ServiceInfo{}).Error; err != nil {
 		// fmt.Println(err)
 		// tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})

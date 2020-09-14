@@ -12,6 +12,7 @@ import (
 
 	"github.com/fatih/structs"
 	"github.com/jinzhu/gorm"
+
 	// _ "github.com/jinzhu/gorm/dialects/sqlite"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -30,8 +31,8 @@ func ConnectDB() {
 		sumInfo      InterfaceEntity.SumInfo
 		chartInfo    InterfaceEntity.ChartInfo
 		serviceInfos []InterfaceEntity.ServiceInfo
-		consulInfo  InterfaceEntity.ConsulInfo
-		rabbitMQInfo  InterfaceEntity.RabbitMQInfo
+		consulInfo   InterfaceEntity.ConsulInfo
+		rabbitMQInfo InterfaceEntity.RabbitMQInfo
 	)
 	if err := DB.Find(&sumInfo).Error; err != nil {
 		sumInfo = InterfaceEntity.SumInfo{
@@ -44,19 +45,19 @@ func ConnectDB() {
 	}
 	if err := DB.Find(&consulInfo).Error; err != nil {
 		consulInfo = InterfaceEntity.ConsulInfo{
-			ConsulId:       Utils.GenerateUUID(),
-			ConsulAddress:    "",
-			Type:"consul",
+			ConsulId:      Utils.GenerateUUID(),
+			ConsulAddress: "",
+			Type:          "consul",
 		}
 		DB.Create(&consulInfo)
 	}
 	if err := DB.Find(&rabbitMQInfo).Error; err != nil {
 		rabbitMQInfo := InterfaceEntity.RabbitMQInfo{
 			RabbitMQId:       Utils.GenerateUUID(),
-			RabbitMQAddress:"",
-			RabbitMQUserName:"",
-			RabbitMQPassword:"",
-			Type:"rabbitMq",
+			RabbitMQAddress:  "",
+			RabbitMQUserName: "",
+			RabbitMQPassword: "",
+			Type:             "rabbitMq",
 		}
 		DB.Create(&rabbitMQInfo)
 	}
@@ -124,8 +125,11 @@ func ConnectDB() {
 		}
 	}
 
-	DB.DB().SetMaxIdleConns(1000)
-	DB.DB().SetMaxOpenConns(5000)
-	DB.DB().SetConnMaxLifetime(30 * time.Minute)
+	// DB.DB().SetMaxIdleConns(1000)
+	// DB.DB().SetMaxOpenConns(5000)
+	DB.SingularTable(true)
+	DB.DB().SetMaxIdleConns(10)
+	DB.DB().SetMaxOpenConns(100)
+	// DB.DB().SetConnMaxLifetime(30 * time.Minute)
 	DB.LogMode(true)
 }

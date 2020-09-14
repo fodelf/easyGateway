@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-09-06 15:56:41
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-10 09:10:15
+ * @LastEditTime: 2020-09-14 19:57:19
 -->
 <template>
   <el-form ref="ruleForm" :model="ruleForm" :rules='serviceRules' :inline="true" class='projectAdd' label-width='150px' label-position="left" :disabled="$route.query.type=='check'">
@@ -56,12 +56,12 @@
         <el-button type='primary' icon="el-icon-plus" circle @click='addRule'></el-button>
       </el-form-item>
     </el-row>
-    <el-form :model="item" v-for="(item,index) in ruleForm.serviceRules" :key='index' label-width='150px' :inline="true">
+    <el-form v-for="(item,index) in ruleForm.serviceRules" :key='index' label-width='150px' :inline="true">
       <el-row :gutter=20>
         <el-col :span='8'>
           <!-- /<el-form-item label="拦截地址" prop='interceptLoc' :rules="{ required: true, message: '请输入拦截地址', trigger: 'blur' }"> -->
-          <el-form-item label="拦截地址">
-            <el-input type='text' v-model="item.url" placeholder="示例：/api,不能以ui开头"></el-input>
+          <el-form-item label="拦截地址" :prop="'serviceRules.'+index+'.url'"  :rules="rules.apiUrl">
+            <el-input type='text' v-model="item.url"  placeholder="示例：/api,不能以ui开头"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span='8'>

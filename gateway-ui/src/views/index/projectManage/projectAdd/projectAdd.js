@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-09-06 15:56:49
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-09 09:23:31
+ * @LastEditTime: 2020-09-14 20:02:02
  */
 import {
   getServiceType,
@@ -53,6 +53,11 @@ export default {
         ],
         serviceAddress:[
           { required: true, message: '请输入服务地址', trigger: 'blur' },
+        ]
+      },
+      rules:{
+        apiUrl:[
+          { required: true, message: '请输入拦截地址', trigger: 'blur' },
         ]
       },
       inputVisible:false,
@@ -105,13 +110,13 @@ export default {
     saveRule() {
       this.$refs["ruleForm"].validate((valid) => {
         if (valid) {
-          let params = this.ruleForm
-          // this.ruleForm.servicePort = this.ruleForm.servicePort*1
-          // this.ruleForm.serviceLimit = this.ruleForm.serviceLimit*1
-          // this.ruleForm.serviceBreak = this.ruleForm.serviceBreak*1
-          // this.ruleForm.useConsulPort = this.ruleForm.useConsulPort*1
-          // this.ruleForm.useConsulInterval = this.ruleForm.useConsulInterval*1
-          // this.ruleForm.useConsulTimeout = this.ruleForm.useConsulTimeout*1
+          let params = JSON.parse(JSON.stringify(this.ruleForm))
+          params.servicePort = params.servicePort*1
+          params.serviceLimit = params.serviceLimit*1
+          params.serviceBreak = params.serviceBreak*1
+          params.useConsulPort = params.useConsulPort*1
+          params.useConsulInterval = params.useConsulInterval*1
+          params.useConsulTimeout = params.useConsulTimeout*1
           addService(params).then(res=>{
             this.$router.push({
               name:'projectManage'
