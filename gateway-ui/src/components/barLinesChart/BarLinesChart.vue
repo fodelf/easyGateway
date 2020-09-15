@@ -4,7 +4,7 @@
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:59:55
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-08 20:27:05
+ * @LastEditTime: 2020-09-15 19:44:58
  -->
 <template>
   <div ref="chart" id ='chart'></div>
@@ -111,6 +111,13 @@ export default {
   },
   mounted() {
     this.initChart()
+    window.onresize = ()=> {
+      try {
+        this.myChart.resize()
+      } catch (error) {
+
+      }
+    }
   },
   created() {
   },

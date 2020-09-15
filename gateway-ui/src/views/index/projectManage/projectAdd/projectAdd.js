@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-09-06 15:56:49
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-14 20:02:02
+ * @LastEditTime: 2020-09-15 19:46:35
  */
 import {
   getServiceType,
@@ -149,7 +149,7 @@ export default {
     }else {
       this.ruleForm= {
         serviceName: '',
-        serviceType: '',
+        serviceType: 'http',
         serviceAddress: '',
         servicePort: '',
         serviceRules: [],
