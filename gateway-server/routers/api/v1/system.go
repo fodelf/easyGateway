@@ -1,13 +1,13 @@
 package v1
 
 import (
-	"net/http"
-	service "gateway/database"
-	"github.com/gin-gonic/gin"
 	InterfaceEntity "gateway/models/InterfaceEntity"
-	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"gateway/pkg/e"
-	"fmt"
+	"net/http"
+
+	"github.com/EDDYCJY/go-gin-example/pkg/app"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	// "strconv"
 )
 
@@ -21,21 +21,23 @@ import (
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/system/editConsul [post]
 type ConsulPost struct {
-	ConsulAddress      string `json:"address"`
-	ConsulPort         int    `json:"port"`
+	ConsulAddress string `json:"address"`
+	ConsulPort    int    `json:"port"`
 }
+
 func EditConsul(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var consulPost ConsulPost
 	if err := c.ShouldBind(&consulPost); err != nil {
-        return
+		return
 	}
 	consulInfo := InterfaceEntity.ConsulInfo{
-		ConsulAddress:consulPost.ConsulAddress,
-		ConsulPort: consulPost.ConsulPort,
+		ConsulAddress: consulPost.ConsulAddress,
+		ConsulPort:    consulPost.ConsulPort,
 	}
-	fmt.Println(consulInfo)
-	tx := service.DB.Begin()
+	// fmt.Println(consulInfo)
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	tx := DB.Begin()
 	if err := tx.Model(&InterfaceEntity.ConsulInfo{}).Update(&consulInfo).Error; err != nil {
 		tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
@@ -57,24 +59,26 @@ func EditConsul(c *gin.Context) {
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/system/editRabbitMq [post]
 type RabbitMqPost struct {
-	RabbitMqAddress      string `json:"address"`
-	RabbitMqPort         int    `json:"port"`
-	RabbitMqUserName         string    `json:"userName"`
-	RabbitMqPassWord       string    `json:"password"`
+	RabbitMqAddress  string `json:"address"`
+	RabbitMqPort     int    `json:"port"`
+	RabbitMqUserName string `json:"userName"`
+	RabbitMqPassWord string `json:"password"`
 }
+
 func EditRabbitMq(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var rabbitMqPost RabbitMqPost
 	if err := c.ShouldBind(&rabbitMqPost); err != nil {
-        return
+		return
 	}
 	rabbitMq := InterfaceEntity.RabbitMQInfo{
-		RabbitMQAddress:rabbitMqPost.RabbitMqAddress,
-		RabbitMQPort  :rabbitMqPost.RabbitMqPort,
-		RabbitMQUserName  :rabbitMqPost.RabbitMqUserName,
-		RabbitMQPassword  :rabbitMqPost.RabbitMqPassWord,
+		RabbitMQAddress:  rabbitMqPost.RabbitMqAddress,
+		RabbitMQPort:     rabbitMqPost.RabbitMqPort,
+		RabbitMQUserName: rabbitMqPost.RabbitMqUserName,
+		RabbitMQPassword: rabbitMqPost.RabbitMqPassWord,
 	}
-	tx := service.DB.Begin()
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	tx := DB.Begin()
 	if err := tx.Model(&InterfaceEntity.RabbitMQInfo{}).Update(&rabbitMq).Error; err != nil {
 		tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
@@ -94,19 +98,21 @@ func EditRabbitMq(c *gin.Context) {
 func GetSystemDetail(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
-		consulInfo  InterfaceEntity.ConsulInfo
+		consulInfo   InterfaceEntity.ConsulInfo
 		rabbitMQInfo InterfaceEntity.RabbitMQInfo
 	)
-	if err := service.DB.First(&consulInfo).Error; err != nil {
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	if err := DB.First(&consulInfo).Error; err != nil {
 	} else {
 
 	}
-	if err := service.DB.First(&rabbitMQInfo).Error; err != nil {
+	if err := DB.First(&rabbitMQInfo).Error; err != nil {
 	} else {
 
 	}
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
-		"rabbitMq":rabbitMQInfo,
-		"consul":consulInfo,
+		"rabbitMq": rabbitMQInfo,
+		"consul":   consulInfo,
 	})
+	DB.Close()
 }

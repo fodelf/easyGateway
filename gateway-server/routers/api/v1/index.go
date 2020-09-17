@@ -1,17 +1,17 @@
 package v1
 
 import (
-	service "gateway/database"
 	InterfaceEntity "gateway/models/InterfaceEntity"
 	"gateway/pkg/e"
 	Utils "gateway/utils"
 	"net/http"
 	Time "time"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/jinzhu/gorm"
+
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Result struct {
@@ -32,7 +32,7 @@ func GetSum(c *gin.Context) {
 	var sumInfo InterfaceEntity.SumInfo
 	// service.DB.Begin()
 	// var tx = service.DB.Begin()
-	DB, _ := gorm.Open("sqlite3", "database_file.sqlite?cache=shared&mode=rwc")
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
 	if err := DB.Find(&sumInfo).Error; err != nil {
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 		// tx.Rollback()
@@ -61,7 +61,7 @@ func GetCharts(c *gin.Context) {
 		failList    []int    = []int{}
 	)
 	// var tx = service.DB.Begin()
-	DB, _ := gorm.Open("sqlite3", "database_file.sqlite?cache=shared&mode=rwc")
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
 	if err := DB.Limit(7).Order("chart_id DESC").Find(&charts).Error; err != nil {
 		// tx.Rollback()
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
@@ -139,12 +139,12 @@ func GetActualTime(c *gin.Context) {
 		todayState string
 	)
 	// var tx = service.DB
-	DB, _ := gorm.Open("sqlite3", "database_file.sqlite?cache=shared&mode=rwc")
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
 	// tx.Close()
 	// defer tx.Commit()
 	if err := DB.Limit(1).Order("chart_id DESC").Find(&charts).Error; err != nil {
 		// tx.Rollback()
-		
+
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 	} else {
 		// tx.Close()
@@ -196,7 +196,8 @@ func GetWarningList(c *gin.Context) {
 		resultList []string = []string{}
 	)
 	// var tx = service.DB.Begin()
-	if err := service.DB.Limit(7).Order("warning_id DESC").Find(&warnings).Error; err != nil {
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	if err := DB.Limit(7).Order("warning_id DESC").Find(&warnings).Error; err != nil {
 		// tx.Rollback()
 		// appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
@@ -218,5 +219,6 @@ func GetWarningList(c *gin.Context) {
 			"warningList": resultList,
 		})
 	}
+	DB.Close()
 	// defer tx.Close()
 }

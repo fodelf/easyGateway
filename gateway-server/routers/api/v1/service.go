@@ -2,7 +2,6 @@ package v1
 
 import (
 	"fmt"
-	service "gateway/database"
 	proxy "gateway/middleware/proxy"
 	InterfaceEntity "gateway/models/InterfaceEntity"
 	"gateway/pkg/e"
@@ -16,6 +15,7 @@ import (
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 // @Tags  服务模块
@@ -33,13 +33,14 @@ func GetServerSum(c *gin.Context) {
 		count       int                      = 0
 		serverList  []map[string]interface{} = []map[string]interface{}{}
 	)
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
 	// var tx = service.DB.Begin()
 	// tx.Close()
-	if err := service.DB.Model(&serviceInfo).Count(&sum).Error; err != nil {
+	if err := DB.Model(&serviceInfo).Count(&sum).Error; err != nil {
 	}
 	// tx.Close()
 	// var tx1 = service.DB.Begin()
-	if err := service.DB.Model(&serviceInfo).Where("service_type =?", "http").Count(&count).Error; err != nil {
+	if err := DB.Model(&serviceInfo).Where("service_type =?", "http").Count(&count).Error; err != nil {
 	}
 	// tx1.Close()
 	var serviceInterface = map[string]interface{}{
@@ -52,6 +53,7 @@ func GetServerSum(c *gin.Context) {
 		"serverList": serverList,
 		"sum":        sum,
 	})
+	DB.Close()
 }
 
 type Rule struct {
@@ -72,8 +74,9 @@ func GetServerList(c *gin.Context) {
 	var (
 		serverList []InterfaceEntity.ServiceInfo = []InterfaceEntity.ServiceInfo{}
 	)
-	var tx = service.DB.Begin()
-	if err := tx.Find(&serverList).Where("delete_flag =?", 0).Error; err != nil {
+	// var tx = service.DB.Begin()
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	if err := DB.Find(&serverList).Where("delete_flag =?", 0).Error; err != nil {
 
 	} else {
 	}
@@ -81,6 +84,8 @@ func GetServerList(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
 		"serverList": serverList,
 	})
+
+	DB.Close()
 }
 
 // @Tags  服务模块
@@ -97,7 +102,8 @@ func GetServerDetail(c *gin.Context) {
 		serviceInfo InterfaceEntity.ServiceInfo
 	)
 	var serverId = c.Query("serverId")
-	if err := service.DB.Find(&serviceInfo).Where("service_id =?", serverId).Error; err != nil {
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	if err := DB.Find(&serviceInfo).Where("service_id =?", serverId).Error; err != nil {
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
 	} else {
 		var serviceInfoMap = structs.Map(serviceInfo)
@@ -159,7 +165,7 @@ func GetServerDetail(c *gin.Context) {
 			"dingdingList":        serviceInfoMap["DingdingList"],
 		})
 	}
-
+	DB.Close()
 }
 
 // @Tags  服务模块
@@ -262,15 +268,8 @@ func ImportService(c *gin.Context) {
 		DingdingList:        DingdingList,
 	}
 	fmt.Println(serviceInfo)
-	tx := service.DB.Begin()
-	// if err != nil {
-	// 	fmt.Printf("begin. Exec error=%s", err)
-	// 	return
-	// }
-	defer tx.Commit()
-	// tx := service.DB.Begin()
-	// service.DB.Open()
-	if err := tx.Create(&serviceInfo).Error; err != nil {
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	if err := DB.Create(&serviceInfo).Error; err != nil {
 		fmt.Println(err)
 		// tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
@@ -282,6 +281,7 @@ func ImportService(c *gin.Context) {
 		// tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}
+	DB.Close()
 }
 
 // @Tags  服务模块
@@ -354,10 +354,12 @@ func EditService(c *gin.Context) {
 		DingdingList:        DingdingList,
 	}
 	fmt.Println(serviceInfo)
-	service.DB.Close()
-	if err := service.DB.Model(&InterfaceEntity.ServiceInfo{}).Where("server_id =", body["ServerId"].(string)).Update(&serviceInfo).Error; err != nil {
+	// service.DB.Close()
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	tx := DB.Begin()
+	if err := tx.Model(&InterfaceEntity.ServiceInfo{}).Where("server_id =", body["ServerId"].(string)).Update(&serviceInfo).Error; err != nil {
 		fmt.Println(err)
-		// tx.Rollback()
+		tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
 	} else {
 		// tx.Close()
@@ -365,7 +367,7 @@ func EditService(c *gin.Context) {
 		// servicePort, _ := strconv.Atoi(body["servicePort"].(string))
 		// SingleProxyConfig["servicePort"] = servicePort
 		// proxy.ProxyConfig = append(proxy.ProxyConfig, SingleProxyConfig)
-		// tx.Commit()
+		tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}
 }
@@ -387,13 +389,14 @@ func DeleteService(c *gin.Context) {
 	var ser DeleteServiceBody
 	c.ShouldBind(&ser)
 	// 数据物理删除
-	// tx := service.DB.Begin()
-	if err := service.DB.Where("server_id = ?", ser.ServerId).Delete(&InterfaceEntity.ServiceInfo{}).Error; err != nil {
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	tx := DB.Begin()
+	if err := tx.Where("server_id = ?", ser.ServerId).Delete(&InterfaceEntity.ServiceInfo{}).Error; err != nil {
 		// fmt.Println(err)
-		// tx.Rollback()
+		tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
 	} else {
-		// tx.Commit()
+		tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}
 	// tx.Close()

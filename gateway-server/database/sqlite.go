@@ -21,7 +21,7 @@ var DB *gorm.DB
 
 func ConnectDB() {
 	var err error
-	DB, err = gorm.Open("sqlite3", "database_file.sqlite?cache=shared&mode=rwc")
+	DB, err = gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
 
 	if err = DB.AutoMigrate(model.Models...).Error; nil != err {
 		log.Fatal("auto migrate tables failed: " + err.Error())
