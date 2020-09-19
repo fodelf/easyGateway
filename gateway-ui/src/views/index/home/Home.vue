@@ -1,7 +1,7 @@
 <!--
  * @Author: 吴文周
  * @Date: 2020-04-12 16:16:34
- * @LastEditTime: 2020-09-09 08:50:38
+ * @LastEditTime: 2020-09-19 11:24:25
  * @LastEditors: 吴文周
  * @Description: 首页模块
  * @FilePath: /workespacemanger/src/views/home/Home.vue
@@ -23,8 +23,8 @@
             </el-col>
             <el-col :span='4'>
               <el-select v-model="serviceType">
-                <el-option label='全部' value='all'></el-option>
-                <!-- <el-option label='服务一' value='serviceFirst'></el-option> -->
+                <!-- <el-option label='全部' value='all'></el-option> -->
+                <el-option v-for="(item,index) in serviceList" :key="index" :label='item.serviceName' :value='item.serverId'></el-option>
               </el-select>
             </el-col>
           </el-row>

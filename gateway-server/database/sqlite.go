@@ -129,8 +129,8 @@ func ConnectDB() {
 	// DB.DB().SetMaxOpenConns(5000)
 	defer DB.Close()
 	// DB.SingularTable(true)
-	// DB.DB().SetMaxIdleConns(10)
-	// DB.DB().SetMaxOpenConns(100)
+	DB.DB().SetMaxIdleConns(10)
+	DB.DB().SetMaxOpenConns(100)
 	// DB.DB().SetConnMaxLifetime(30 * time.Minute)
 	DB.LogMode(true)
 }

@@ -1,3 +1,5 @@
 # tmp
 /tmp
 gateway.sqlite
+gateway.sqlite-shm
+gateway.sqlite-wal

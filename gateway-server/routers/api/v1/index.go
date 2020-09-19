@@ -32,7 +32,7 @@ func GetSum(c *gin.Context) {
 	var sumInfo InterfaceEntity.SumInfo
 	// service.DB.Begin()
 	// var tx = service.DB.Begin()
-	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
 	if err := DB.Find(&sumInfo).Error; err != nil {
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 		// tx.Rollback()
@@ -82,33 +82,6 @@ func GetCharts(c *gin.Context) {
 			failList = append(failList, fail)
 			timeList = append(timeList, time)
 		}
-		// if len(charts) < 7 {
-		// 	// var ln = len(charts) - 7
-		// 	// for i := 0; i < ln; i++ {
-		// 	// 	// typeOfChart := reflect.ValueOf(chart)
-		// 	// 	// if catType, ok := typeOfChart.FieldByName("time"); ok {
-		// 	// 	// 	// fmt.Println(catType.Tag.Get("Time"))
-		// 	// 	// }
-		// 	// }
-		// 	for i := 0; i < len(charts); i++ {
-		// 		fmt.Println(i)
-		// 		// t := reflect.TypeOf(charts[i])
-		// 		// immutable := reflect.ValueOf(charts[i])
-		// 		total := Utils.GetStructValue(charts[i], "Total")
-		// 		success := Utils.GetStructValue(charts[i], "Success")
-		// 		fail := Utils.GetStructValue(charts[i], "Fail")
-		// 		time := Utils.GetStructValueString(charts[i], "Time")
-		// 		totalList = append(totalList, total)
-		// 		successList = append(successList, success)
-		// 		failList = append(failList, fail)
-		// 		timeList = append(timeList, time)
-		// 	}
-		// } else {
-		// 	for i := 0; i < len(charts); i++ {
-		// 		var child = charts[:i]
-		// 		fmt.Println(child)
-		// 	}
-		// }
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
 			"timeList":    timeList,
 			"totalList":   totalList,

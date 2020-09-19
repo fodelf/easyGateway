@@ -197,7 +197,7 @@ type ImportServiceBody struct {
 func ImportService(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
-		// serviceInfo       InterfaceEntity.ServiceInfo = InterfaceEntity.ServiceInfo{}
+		serviceInfoCount  InterfaceEntity.ServiceInfo
 		DingdingList      string
 		ServiceRules      string                 = ""
 		deleteFlag        int                    = 0
@@ -215,6 +215,8 @@ func ImportService(c *gin.Context) {
 		dingdingList      []string
 		serviceRules      []map[string]interface{}
 		importServiceBody ImportServiceBody
+		sum               int
+		sumInfo           InterfaceEntity.SumInfo
 	)
 	c.ShouldBind(&importServiceBody)
 	servicePort = importServiceBody.ServicePort
@@ -281,6 +283,14 @@ func ImportService(c *gin.Context) {
 		// tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}
+	if err := DB.Model(&serviceInfoCount).Count(&sum).Error; err != nil {
+	}
+	if err := DB.First(&sumInfo).Update("server_sum", sum).Error; err != nil {
+		DB.Rollback()
+	} else {
+		DB.Commit()
+	}
+
 	DB.Close()
 }
 

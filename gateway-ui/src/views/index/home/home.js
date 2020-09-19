@@ -4,7 +4,7 @@
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:55:11
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-09 18:07:14
+ * @LastEditTime: 2020-09-19 11:23:24
  */
 import cardNum from '@/components/cardNum/cardNum'
 import carousel from '@/components/carousel/carousel.vue'
@@ -12,12 +12,17 @@ import actionModule from '@/components/actionModule/actionModule.vue'
 import barLinesChart from '@/components/barLinesChart/BarLinesChart'
 import weather from '@/components/weather/weather.vue'
 import { getIndexCount, queryIndexTrend, queryActualTime, queryWarningList} from '@/api/home.js'
+import { getServiceList } from '@/api/index/projectManage.js'
 export default {
   name: 'home',
   data() {
     return {
       chartData:null,
       serviceType:'all',
+      serviceList:[{
+        "serviceName":"全部",
+        "serverId":"all"
+      }],
       cardList: [
         {
           icon: 'icon-xiangmu',
@@ -62,60 +67,11 @@ export default {
       todoList: [],
       personalObj: {
         msgTit: '个人动态',
-        msgList: [
-          {
-            url: '',
-            name: 'pty',
-            desc: 'Lorem Ipsum is simply dummy text',
-            date: '09:50'
-          },
-          { url: '', name: 'wwz', desc: 'ddddd', date: '09:50' },
-          { url: '', name: 'sam', desc: 'ddddd', date: '09:50' },
-          { url: '', name: 'wuliian', desc: 'ddddd', date: '09:50' },
-          { url: '', name: 'beteli', desc: 'ddddd', date: '09:50' },
-          { url: '', name: 'gyl', desc: 'ddddd', date: '09:50' }
-        ]
+        msgList: []
       },
       teamObj: {
         msgTit: '团队动态',
-        msgList: [
-          {
-            url: '',
-            name: 'tty',
-            desc: 'sung a song! See you at',
-            date: '09:50'
-          },
-          {
-            url: '',
-            name: 'wwz',
-            desc: 'sung a song! See you at',
-            date: '09:50'
-          },
-          {
-            url: '',
-            name: 'sam',
-            desc: 'sung a song! See you at',
-            date: '09:50'
-          },
-          {
-            url: '',
-            name: 'wuliian',
-            desc: 'sung a song! See you at',
-            date: '09:50'
-          },
-          {
-            url: '',
-            name: 'beteli',
-            desc: 'sung a song! See you at',
-            date: '09:50'
-          },
-          {
-            url: '',
-            name: 'gyl',
-            desc: 'sung a song! See you at',
-            date: '09:50'
-          }
-        ]
+        msgList: []
       }
     }
   },
@@ -157,7 +113,21 @@ export default {
       queryWarningList().then(res=>{
         this.carouselList = res.warningList || []
       })
-    }
+    },
+    getServiceList() {
+      let params = {}
+      params = {
+        type: 'all'
+      }
+      let list =  [{
+        "serviceName":"全部",
+        "serverId":"all"
+      }]
+      this.serviceList = list
+      getServiceList(params).then((res) => {
+        this.serviceList = list.concat(res.serverList || [])
+      })
+    },
   },
   mounted() {
     console.log("pc")
@@ -173,5 +143,6 @@ export default {
     this.queryChart()
     this.getActualTime()
     this.getWarningList()
+    this.getServiceList()
   }
 }

@@ -4,16 +4,23 @@ import (
 	// "bytes"
 	// "compress/gzip"
 	"fmt"
+	"gateway/models/InterfaceEntity"
+
 	// "io/ioutil"
+
 	"net/http"
 	"net/http/httputil"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
-var ProxyConfig []map[string]interface{}
+var (
+	ProxyConfig []map[string]interface{}
+	sum         int = 0
+)
 
 func grepProxy(url string) map[string]interface{} {
 	var (
@@ -63,9 +70,24 @@ func grepProxy(url string) map[string]interface{} {
 
 func ReverseProxy() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// fmt.Println(c.Request.URL)
-		// var FullPath  string
-		// var ur,_ = url.Parse(c.Request.URL)
+
+		var (
+			// serviceInfoCount InterfaceEntity.ServiceInfo
+			// sum              int
+			sumInfo InterfaceEntity.SumInfo
+		)
+		DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
+		sum = sum + 1
+		// DB.Begin()
+		// DB.Rollback()
+		// DB.Lock()
+		if err := DB.First(&sumInfo).Update("request_sum", sum).Error; err != nil {
+			// DB.Rollback()
+		} else {
+			// DB.Commit()
+		}
+		// DB.Unlock()
+		DB.Close()
 		urlPath := c.Request.URL.String()
 		var proxyObj = grepProxy(urlPath)
 		if proxyObj["flag"].(bool) {
