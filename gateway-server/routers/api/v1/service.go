@@ -7,8 +7,8 @@ import (
 	"gateway/pkg/e"
 	Utils "gateway/utils"
 	"net/http"
-	"strconv"
 	"strings"
+	"time"
 
 	// "io/ioutil"
 
@@ -176,6 +176,7 @@ func GetServerDetail(c *gin.Context) {
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/service/addService [post]
 type ImportServiceBody struct {
+	ServerId            string                   `json:"serverId"`
 	ServiceName         string                   `json:"serviceName"`
 	ServiceType         string                   `json:"serviceType"`
 	ServiceAddress      string                   `json:"serviceAddress"`
@@ -205,6 +206,10 @@ func ImportService(c *gin.Context) {
 			"serviceAddress": "",
 			"servicePort":    80,
 			"serviceRules":   []map[string]interface{}{},
+			"serverId":       "",
+			"total":          0,
+			"success":        0,
+			"fail":           0,
 		}
 		servicePort       int
 		serviceLimit      int
@@ -249,9 +254,10 @@ func ImportService(c *gin.Context) {
 		}
 		SingleProxyConfig["serviceRules"] = append(SingleProxyConfig["serviceRules"].([]map[string]interface{}), rule)
 	}
+	var generateUUID = Utils.GenerateUUID()
 	serviceInfo := &InterfaceEntity.ServiceInfo{
 		DeleteFlag:          deleteFlag,
-		ServerId:            Utils.GenerateUUID(),
+		ServerId:            generateUUID,
 		ServiceName:         importServiceBody.ServiceName,
 		ServiceType:         importServiceBody.ServiceType,
 		ServiceAddress:      importServiceBody.ServiceAddress,
@@ -270,7 +276,7 @@ func ImportService(c *gin.Context) {
 		DingdingList:        DingdingList,
 	}
 	fmt.Println(serviceInfo)
-	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
 	if err := DB.Create(&serviceInfo).Error; err != nil {
 		fmt.Println(err)
 		// tx.Rollback()
@@ -279,6 +285,7 @@ func ImportService(c *gin.Context) {
 		// tx.Close()
 		SingleProxyConfig["serviceAddress"] = importServiceBody.ServiceAddress
 		SingleProxyConfig["servicePort"] = servicePort
+		SingleProxyConfig["serverId"] = generateUUID
 		proxy.ProxyConfig = append(proxy.ProxyConfig, SingleProxyConfig)
 		// tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
@@ -286,11 +293,18 @@ func ImportService(c *gin.Context) {
 	if err := DB.Model(&serviceInfoCount).Count(&sum).Error; err != nil {
 	}
 	if err := DB.First(&sumInfo).Update("server_sum", sum).Error; err != nil {
-		DB.Rollback()
+		// DB.Rollback()
 	} else {
-		DB.Commit()
+		// DB.Commit()
 	}
-
+	chartInfo := InterfaceEntity.ChartInfo{
+		Time:     time.Now().Format("2006/01/02"),
+		Total:    0,
+		Success:  0,
+		Fail:     0,
+		ServerId: generateUUID,
+	}
+	DB.Create(&chartInfo)
 	DB.Close()
 }
 
@@ -305,29 +319,36 @@ func EditService(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
 		// serviceInfo       InterfaceEntity.ServiceInfo = InterfaceEntity.ServiceInfo{}
-		DingdingList string = ""
-		ServiceRules string = ""
+		DingdingList      string = ""
+		ServiceRules      string = ""
+		importServiceBody ImportServiceBody
 		// SingleProxyConfig map[string]interface{}      = map[string]interface{}{
 		// 	"serviceAddress": "",
 		// 	"servicePort":    80,
 		// 	"serviceRules":   []map[string]interface{}{},
 		// }
+		servicePort       int
+		serviceLimit      int
+		serviceBreak      int
+		useConsulPort     int
+		useConsulInterval int
+		useConsulTimeout  int
 	)
-	var body = Utils.GetJsonBody(c)
-	servicePort, _ := strconv.Atoi(body["servicePort"].(string))
-	serviceLimit, _ := strconv.Atoi(body["serviceLimit"].(string))
-	serviceBreak, _ := strconv.Atoi(body["serviceBreak"].(string))
-	useConsulPort, _ := strconv.Atoi(body["useConsulPort"].(string))
-	useConsulInterval, _ := strconv.Atoi(body["useConsulInterval"].(string))
-	useConsulTimeout, _ := strconv.Atoi(body["useConsulTimeout"].(string))
-	var dingdingList = body["dingdingList"].([]interface{})
+	c.ShouldBind(&importServiceBody)
+	servicePort = importServiceBody.ServicePort
+	serviceLimit = importServiceBody.ServiceLimit
+	serviceBreak = importServiceBody.ServiceBreak
+	useConsulPort = importServiceBody.UseConsulPort
+	useConsulInterval = importServiceBody.UseConsulInterval
+	useConsulTimeout = importServiceBody.UseConsulTimeout
+	var dingdingList = importServiceBody.DingdingList
 	for i := 0; i < len((dingdingList)); i++ {
-		var dingding = dingdingList[i].(string)
+		var dingding = dingdingList[i]
 		DingdingList = DingdingList + "," + dingding
 	}
-	var serviceRules = body["serviceRules"].([]interface{})
+	var serviceRules = importServiceBody.ServiceRules
 	for i := 0; i < len((serviceRules)); i++ {
-		var service = serviceRules[i].(map[string]interface{})
+		var service = serviceRules[i]
 		var oldPath = service["pathReWriteBefore"].(string)
 		var newPath = service["pathReWriteUrl"].(string)
 		if i == 0 {
@@ -345,29 +366,29 @@ func EditService(c *gin.Context) {
 		// SingleProxyConfig["serviceRules"] = append(SingleProxyConfig["serviceRules"].([]map[string]interface{}), rule)
 	}
 	serviceInfo := &InterfaceEntity.ServiceInfo{
-		ServerId:            body["ServerId"].(string),
-		ServiceName:         body["serviceName"].(string),
-		ServiceType:         body["serviceType"].(string),
-		ServiceAddress:      body["serviceAddress"].(string),
+		ServerId:            importServiceBody.ServerId,
+		ServiceName:         importServiceBody.ServiceName,
+		ServiceType:         importServiceBody.ServiceType,
+		ServiceAddress:      importServiceBody.ServiceAddress,
 		ServicePort:         servicePort,
 		ServiceLimit:        serviceLimit,
 		ServiceBreak:        serviceBreak,
 		ServiceRules:        ServiceRules,
-		UseConsulId:         body["useConsulId"].(string),
-		UseConsulTag:        body["useConsulTag"].(string),
-		UseConsulCheckPath:  body["useConsulCheckPath"].(string),
+		UseConsulId:         importServiceBody.UseConsulId,
+		UseConsulTag:        importServiceBody.UseConsulTag,
+		UseConsulCheckPath:  importServiceBody.UseConsulCheckPath,
 		UseConsulPort:       useConsulPort,
 		UseConsulInterval:   useConsulInterval,
 		UseConsulTimeout:    useConsulTimeout,
-		DingdingAccessToken: body["dingdingAccessToken"].(string),
-		DingdingSecret:      body["dingdingSecret"].(string),
+		DingdingAccessToken: importServiceBody.DingdingAccessToken,
+		DingdingSecret:      importServiceBody.DingdingSecret,
 		DingdingList:        DingdingList,
 	}
-	fmt.Println(serviceInfo)
+	fmt.Println(importServiceBody.ServerId)
 	// service.DB.Close()
-	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
 	tx := DB.Begin()
-	if err := tx.Model(&InterfaceEntity.ServiceInfo{}).Where("server_id =", body["ServerId"].(string)).Update(&serviceInfo).Error; err != nil {
+	if err := tx.Model(&InterfaceEntity.ServiceInfo{}).Where("server_id = ?", importServiceBody.ServerId).Update(&serviceInfo).Error; err != nil {
 		fmt.Println(err)
 		tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})

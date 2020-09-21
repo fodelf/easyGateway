@@ -10,11 +10,12 @@ type SumInfo struct {
 
 // 图表实体类
 type ChartInfo struct {
-	ChartID int    `json:"chart_id" gorm:"index"`
-	Time    string `json:"time"`
-	Total   int    `json:"total"`
-	Success int    `json:"success"`
-	Fail    int    `json:"fail"`
+	ChartID  int    `json:"chart_id" gorm:"index"`
+	Time     string `json:"time"`
+	Total    int    `json:"total"`
+	Success  int    `json:"success"`
+	Fail     int    `json:"fail"`
+	ServerId string `json:"serverId"`
 }
 
 // 图表列表实体类

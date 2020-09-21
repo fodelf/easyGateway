@@ -42,6 +42,15 @@ func ConnectDB() {
 			FailSum:    0,
 		}
 		DB.Create(&sumInfo)
+	} else {
+		var sumMap = structs.Map(sumInfo)
+		proxy.RequestSum = sumMap["RequestSum"].(int)
+		// proxy.CacheSumInfo = map[string]interface{}{
+		// 	"serverSum":  sumMap["ServerSum"].(int),
+		// 	"warningSum": sumMap["WarningSum"].(int),
+		// 	"requestSum": sumMap["RequestSum"].(int),
+		// 	"failSum":    sumMap["FailSum"].(int),
+		// }
 	}
 	if err := DB.Find(&consulInfo).Error; err != nil {
 		consulInfo = InterfaceEntity.ConsulInfo{
@@ -72,19 +81,26 @@ func ConnectDB() {
 	}
 	if err := DB.Find(&chartInfo).Error; err != nil {
 		chartInfo := InterfaceEntity.ChartInfo{
-			Time:    time.Now().Format("2006/01/02"),
-			Total:   0,
-			Success: 0,
-			Fail:    0,
+			Time:     time.Now().Format("2006/01/02"),
+			Total:    0,
+			Success:  0,
+			Fail:     0,
+			ServerId: "all",
 		}
 		DB.Create(&chartInfo)
+	} else {
+		if err := DB.Find(&chartInfo).Where("time = ?", time.Now().Format("2006/01/02")).Error; err != nil {
+		} else {
+			var chartInfoCache = structs.Map(chartInfo)
+			proxy.Total = chartInfoCache["Total"].(int)
+		}
 	}
 	if err := DB.Find(&serviceInfos).Error; err != nil {
 	} else {
 		for i := 0; i < len(serviceInfos); i++ {
 			var serviceInfo = structs.Map(serviceInfos[i])
-			fmt.Println(serviceInfo)
 			var SingleProxyConfig map[string]interface{} = map[string]interface{}{
+				"serverId":       serviceInfo["ServerId"],
 				"serviceAddress": serviceInfo["ServiceAddress"],
 				"servicePort":    serviceInfo["ServicePort"],
 				"serviceRules":   []map[string]interface{}{},

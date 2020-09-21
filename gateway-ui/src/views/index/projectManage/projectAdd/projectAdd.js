@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-09-06 15:56:49
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-15 19:46:35
+ * @LastEditTime: 2020-09-21 16:52:17
  */
 import {
   getServiceType,
@@ -90,7 +90,9 @@ export default {
       this.ruleForm.serviceRules.push(
         {
           interceptLoc:'',
-          locationReset:''
+          locationReset:'',
+          pathReWriteBefore:"",
+          pathReWriteUrl:""
         }
       );
     },

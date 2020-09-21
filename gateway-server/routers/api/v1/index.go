@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	InterfaceEntity "gateway/models/InterfaceEntity"
 	"gateway/pkg/e"
 	Utils "gateway/utils"
@@ -69,6 +70,7 @@ func GetCharts(c *gin.Context) {
 		for i, j := 0, len(charts)-1; i < j; i, j = i+1, j-1 {
 			charts[i], charts[j] = charts[j], charts[i]
 		}
+		fmt.Println(charts)
 		for i := 0; i < len(charts); i++ {
 			// t := reflect.TypeOf(charts[i])
 			// immutable := reflect.ValueOf(charts[i])

@@ -3,8 +3,9 @@ package proxy
 import (
 	// "bytes"
 	// "compress/gzip"
-	"fmt"
+
 	"gateway/models/InterfaceEntity"
+	"time"
 
 	// "io/ioutil"
 
@@ -19,7 +20,8 @@ import (
 
 var (
 	ProxyConfig []map[string]interface{}
-	sum         int = 0
+	RequestSum  int = 0 // 请求成功汇总
+	Total       int = 0
 )
 
 func grepProxy(url string) map[string]interface{} {
@@ -47,8 +49,6 @@ func grepProxy(url string) map[string]interface{} {
 			urlkey = rule["url"].(string)
 			if strings.HasPrefix(url, urlkey) {
 				var pathReWrite = rule["pathReWrite"].(map[string]interface{})
-				fmt.Println("---------------------")
-				fmt.Println(pathReWrite)
 				ServerConfig = map[string]interface{}{
 					"flag":           false,
 					"serviceAddress": child["serviceAddress"].(string),
@@ -60,6 +60,8 @@ func grepProxy(url string) map[string]interface{} {
 							"newPath": pathReWrite["newPath"].(string),
 						},
 					},
+					"index":    i,
+					"serverId": child["serverId"].(string),
 				}
 				break
 			}
@@ -75,25 +77,24 @@ func ReverseProxy() gin.HandlerFunc {
 			// serviceInfoCount InterfaceEntity.ServiceInfo
 			// sum              int
 			sumInfo InterfaceEntity.SumInfo
+			// chartInfo  InterfaceEntity.ChartInfo
+			chartInfo InterfaceEntity.ChartInfo
 		)
-		DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
-		sum = sum + 1
-		// DB.Begin()
-		// DB.Rollback()
-		// DB.Lock()
-		if err := DB.First(&sumInfo).Update("request_sum", sum).Error; err != nil {
-			// DB.Rollback()
-		} else {
-			// DB.Commit()
-		}
-		// DB.Unlock()
-		DB.Close()
 		urlPath := c.Request.URL.String()
 		var proxyObj = grepProxy(urlPath)
 		if proxyObj["flag"].(bool) {
 			c.Next()
 			return
 		}
+		DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
+		if err := DB.First(&sumInfo).Update("request_sum", gorm.Expr("request_sum + ?", 1)).Error; err != nil {
+		}
+		if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), "all").Update("total", gorm.Expr("total + ?", 1)).Error; err != nil {
+		} else {
+		}
+		if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), proxyObj["serverId"]).Update("total", gorm.Expr("total + ?", 1)).Error; err != nil {
+		}
+		DB.Close()
 		var serviceAddress = proxyObj["serviceAddress"].(string)
 		var prot = strconv.Itoa(proxyObj["servicePort"].(int))
 		var serviceRule = proxyObj["serviceRule"].(map[string]interface{})
@@ -149,12 +150,17 @@ func ReverseProxy() gin.HandlerFunc {
 		//错误回调 ：关闭real_server时测试，错误回调
 		//范围：transport.RoundTrip发生的错误、以及ModifyResponse发生的错误
 		errFunc := func(w http.ResponseWriter, r *http.Request, err error) {
-			//todo record error log
-			fmt.Println(err)
+			DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
+			if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), proxyObj["serverId"]).Update("fail", gorm.Expr("fail + ?", 1)).Error; err != nil {
+			}
+			DB.Close()
 		}
 		proxy := &httputil.ReverseProxy{Director: director, ErrorHandler: errFunc}
 		proxy.ServeHTTP(c.Writer, c.Request)
 		c.Next()
-		// return
+		DBNext, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
+		if err := DBNext.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), proxyObj["serverId"]).Update("success", gorm.Expr("total - fail")).Error; err != nil {
+		}
+		DBNext.Close()
 	}
 }
