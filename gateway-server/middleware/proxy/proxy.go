@@ -82,7 +82,7 @@ func ReverseProxy() gin.HandlerFunc {
 		)
 		urlPath := c.Request.URL.String()
 		var proxyObj = grepProxy(urlPath)
-		if proxyObj["flag"].(bool) {
+		if proxyObj["flag"].(bool) || strings.HasPrefix(urlPath, "uiApi") {
 			c.Next()
 			return
 		}

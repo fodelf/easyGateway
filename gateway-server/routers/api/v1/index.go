@@ -6,6 +6,7 @@ import (
 	"gateway/pkg/e"
 	Utils "gateway/utils"
 	"net/http"
+	"time"
 	Time "time"
 
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
@@ -55,15 +56,20 @@ func GetSum(c *gin.Context) {
 func GetCharts(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
-		charts      []InterfaceEntity.ChartInfo
-		timeList    []string = []string{}
-		totalList   []int    = []int{}
-		successList []int    = []int{}
-		failList    []int    = []int{}
+		charts          []InterfaceEntity.ChartInfo
+		timeList        []string = []string{}
+		totalList       []int    = []int{}
+		successList     []int    = []int{}
+		failList        []int    = []int{}
+		tempTimeList    []string = []string{}
+		tempTotalList   []int    = []int{}
+		tempSuccessList []int    = []int{}
+		tempFailList    []int    = []int{}
 	)
 	// var tx = service.DB.Begin()
 	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
-	if err := DB.Limit(7).Order("chart_id DESC").Find(&charts).Error; err != nil {
+	id := c.Query("type")
+	if err := DB.Limit(7).Order("chart_id DESC").Where("server_id = ?", id).Find(&charts).Error; err != nil {
 		// tx.Rollback()
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 	} else {
@@ -84,6 +90,19 @@ func GetCharts(c *gin.Context) {
 			failList = append(failList, fail)
 			timeList = append(timeList, time)
 		}
+		var dis = 7 - len(totalList)
+		for k := 0; k < dis; k++ {
+			var nTime = time.Now()
+			var old = nTime.AddDate(0, 0, (k - dis - 1)).Format("2006/01/02")
+			tempTimeList = append(tempTimeList, old)
+			tempTotalList = append(tempTotalList, 0)
+			tempSuccessList = append(tempSuccessList, 0)
+			tempFailList = append(tempFailList, 0)
+		}
+		totalList = append(tempTotalList, totalList...)
+		timeList = append(tempTimeList, timeList...)
+		successList = append(tempSuccessList, successList...)
+		failList = append(tempFailList, failList...)
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
 			"timeList":    timeList,
 			"totalList":   totalList,
@@ -117,9 +136,8 @@ func GetActualTime(c *gin.Context) {
 	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
 	// tx.Close()
 	// defer tx.Commit()
-	if err := DB.Limit(1).Order("chart_id DESC").Find(&charts).Error; err != nil {
+	if err := DB.Where("server_id = ? AND time = ?", "all", Time.Now().Format("2006/01/02")).Find(&charts).Error; err != nil {
 		// tx.Rollback()
-
 		appG.Response(http.StatusInternalServerError, e.ERROR, nil)
 	} else {
 		// tx.Close()

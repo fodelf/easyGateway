@@ -4,7 +4,7 @@
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:55:11
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-19 11:23:24
+ * @LastEditTime: 2020-09-22 08:50:24
  */
 import cardNum from '@/components/cardNum/cardNum'
 import carousel from '@/components/carousel/carousel.vue'
@@ -100,7 +100,7 @@ export default {
       })
     },
     queryChart() {
-      queryIndexTrend(0).then(res => {
+      queryIndexTrend(this.serviceType).then(res => {
         this.chartData = res
       })
     },
@@ -115,16 +115,16 @@ export default {
       })
     },
     getServiceList() {
-      let params = {}
-      params = {
-        type: 'all'
-      }
+      // let params = {}
+      // params = {
+      //   type: "all"
+      // }
       let list =  [{
         "serviceName":"全部",
         "serverId":"all"
       }]
       this.serviceList = list
-      getServiceList(params).then((res) => {
+      getServiceList().then((res) => {
         this.serviceList = list.concat(res.serverList || [])
       })
     },

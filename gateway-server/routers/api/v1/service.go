@@ -417,18 +417,20 @@ type DeleteServiceBody struct {
 
 func DeleteService(c *gin.Context) {
 	appG := app.Gin{C: c}
-	var ser DeleteServiceBody
+	var (
+		sumInfo InterfaceEntity.SumInfo
+		ser     DeleteServiceBody
+	)
 	c.ShouldBind(&ser)
 	// 数据物理删除
-	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
-	tx := DB.Begin()
-	if err := tx.Where("server_id = ?", ser.ServerId).Delete(&InterfaceEntity.ServiceInfo{}).Error; err != nil {
-		// fmt.Println(err)
-		tx.Rollback()
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
+	if err := DB.First(&sumInfo).Update("server_sum", gorm.Expr("server_sum - ?", 1)).Error; err != nil {
+	}
+	if err := DB.Where("server_id = ?", ser.ServerId).Delete(&InterfaceEntity.ServiceInfo{}).Error; err != nil {
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
 	} else {
-		tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}
+	DB.Close()
 	// tx.Close()
 }

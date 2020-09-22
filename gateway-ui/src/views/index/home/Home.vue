@@ -1,7 +1,7 @@
 <!--
  * @Author: 吴文周
  * @Date: 2020-04-12 16:16:34
- * @LastEditTime: 2020-09-19 11:24:25
+ * @LastEditTime: 2020-09-22 09:00:58
  * @LastEditors: 吴文周
  * @Description: 首页模块
  * @FilePath: /workespacemanger/src/views/home/Home.vue
@@ -22,7 +22,7 @@
               日常请求记录
             </el-col>
             <el-col :span='4'>
-              <el-select v-model="serviceType">
+              <el-select v-model="serviceType" @change="queryChart">
                 <!-- <el-option label='全部' value='all'></el-option> -->
                 <el-option v-for="(item,index) in serviceList" :key="index" :label='item.serviceName' :value='item.serverId'></el-option>
               </el-select>

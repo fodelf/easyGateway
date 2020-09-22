@@ -33,7 +33,7 @@ func InitRouter() *gin.Engine {
 		//获取首页汇总
 		indexApi.GET("/sum", v1.GetSum)
 		//获取图表信息
-		indexApi.GET("/charts/:id", v1.GetCharts)
+		indexApi.GET("/charts", v1.GetCharts)
 		//实时状态查询
 		indexApi.GET("/actualTime", v1.GetActualTime)
 		//实时状态查询

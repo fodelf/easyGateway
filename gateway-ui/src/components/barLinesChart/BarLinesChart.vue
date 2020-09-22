@@ -4,7 +4,7 @@
  * @Github: https://github.com/fodelf
  * @Date: 2020-03-16 21:59:55
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-15 19:44:58
+ * @LastEditTime: 2020-09-22 09:02:14
  -->
 <template>
   <div ref="chart" id ='chart'></div>
@@ -62,9 +62,9 @@ export default {
             {
                 type: 'value',
                 // name: '次数',
-                min: 0,
-                max: 250,
-                interval: 50,
+                // min: 0,
+                // max: 250,
+                // interval: 50,
                 axisLabel: {
                     formatter: '{value}',
                     color: '#888'
@@ -81,9 +81,9 @@ export default {
             {
                 type: 'value',
                 // name: '次数',
-                min: 0,
-                max: 25,
-                interval: 5,
+                // min: 0,
+                // max: 25,
+                // interval: 5,
                 axisLabel: {
                     formatter: '{value}',
                     color: '#888'
@@ -130,6 +130,7 @@ export default {
     chartData:function(newValue) {
       if(JSON.stringify(newValue) != '{}'){
         console.log(newValue)
+        this.option.series = []
         this.option.xAxis[0].data = newValue.timeList
         let failObj = {
           name: '失败次数',
