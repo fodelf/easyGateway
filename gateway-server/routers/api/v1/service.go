@@ -4,6 +4,7 @@ import (
 	"fmt"
 	proxy "gateway/middleware/proxy"
 	InterfaceEntity "gateway/models/InterfaceEntity"
+	Pkg "gateway/pkg/consul"
 	"gateway/pkg/e"
 	Utils "gateway/utils"
 	"net/http"
@@ -113,13 +114,31 @@ func GetServerDetail(c *gin.Context) {
 		for i := 0; i < len(rules); i++ {
 			var ruleArray = strings.Split(rules[i], ";")
 			var rule = map[string]interface{}{
-				"url":               ruleArray[0],
-				"pathReWriteBefore": ruleArray[1],
-				"pathReWriteUrl":    ruleArray[2],
+				"url":               "",
+				"pathReWriteBefore": "",
+				"pathReWriteUrl":    "",
+			}
+			if len(ruleArray) == 3 {
+				rule = map[string]interface{}{
+					"url":               ruleArray[0],
+					"pathReWriteBefore": ruleArray[1],
+					"pathReWriteUrl":    ruleArray[2],
+				}
+			} else if len(ruleArray) == 2 {
+				rule = map[string]interface{}{
+					"url":               ruleArray[0],
+					"pathReWriteBefore": ruleArray[1],
+					"pathReWriteUrl":    "",
+				}
+			} else if len(ruleArray) == 1 {
+				rule = map[string]interface{}{
+					"url":               ruleArray[0],
+					"pathReWriteBefore": "",
+					"pathReWriteUrl":    "",
+				}
 			}
 			showRules = append(showRules, rule)
 		}
-		// fmt.Println(serviceInfo)
 		serviceInfoMap["ServiceRules"] = showRules
 		var servicePort = serviceInfoMap["ServicePort"]
 		if serviceInfoMap["ServicePort"] == 0 {
@@ -164,8 +183,9 @@ func GetServerDetail(c *gin.Context) {
 			"dingdingSecret":      serviceInfoMap["DingdingSecret"],
 			"dingdingList":        serviceInfoMap["DingdingList"],
 		})
+		DB.Close()
 	}
-	DB.Close()
+	// fmt.Println(serviceInfo
 }
 
 // @Tags  服务模块
@@ -175,25 +195,25 @@ func GetServerDetail(c *gin.Context) {
 // @Produce  json
 // @Success 200 {string} string	Result 成功后返回值
 // @Router /uiApi/v1/service/addService [post]
-type ImportServiceBody struct {
-	ServerId            string                   `json:"serverId"`
-	ServiceName         string                   `json:"serviceName"`
-	ServiceType         string                   `json:"serviceType"`
-	ServiceAddress      string                   `json:"serviceAddress"`
-	ServicePort         int                      `json:"servicePort"`
-	ServiceLimit        int                      `json:"serviceLimit"`
-	ServiceBreak        int                      `json:"serviceBreak"`
-	ServiceRules        []map[string]interface{} `json:"serviceRules"`
-	UseConsulId         string                   `json:"useConsulId"`
-	UseConsulTag        string                   `json:"useConsulTag"`
-	UseConsulCheckPath  string                   `json:"useConsulCheckPath"`
-	UseConsulPort       int                      `json:"useConsulPort"`
-	UseConsulInterval   int                      `json:"useConsulInterval"`
-	UseConsulTimeout    int                      `json:"useConsulTimeout"`
-	DingdingAccessToken string                   `json:"dingdingAccessToken"`
-	DingdingSecret      string                   `json:"dingdingSecret"`
-	DingdingList        []string                 `json:"dingdingList"`
-}
+// type ImportServiceBody struct {
+// 	ServerId            string                   `json:"serverId"`
+// 	ServiceName         string                   `json:"serviceName"`
+// 	ServiceType         string                   `json:"serviceType"`
+// 	ServiceAddress      string                   `json:"serviceAddress"`
+// 	ServicePort         int                      `json:"servicePort"`
+// 	ServiceLimit        int                      `json:"serviceLimit"`
+// 	ServiceBreak        int                      `json:"serviceBreak"`
+// 	ServiceRules        []map[string]interface{} `json:"serviceRules"`
+// 	UseConsulId         string                   `json:"useConsulId"`
+// 	UseConsulTag        string                   `json:"useConsulTag"`
+// 	UseConsulCheckPath  string                   `json:"useConsulCheckPath"`
+// 	UseConsulPort       int                      `json:"useConsulPort"`
+// 	UseConsulInterval   int                      `json:"useConsulInterval"`
+// 	UseConsulTimeout    int                      `json:"useConsulTimeout"`
+// 	DingdingAccessToken string                   `json:"dingdingAccessToken"`
+// 	DingdingSecret      string                   `json:"dingdingSecret"`
+// 	DingdingList        []string                 `json:"dingdingList"`
+// }
 
 func ImportService(c *gin.Context) {
 	appG := app.Gin{C: c}
@@ -219,9 +239,10 @@ func ImportService(c *gin.Context) {
 		useConsulTimeout  int
 		dingdingList      []string
 		serviceRules      []map[string]interface{}
-		importServiceBody ImportServiceBody
+		importServiceBody InterfaceEntity.ImportServiceBody
 		sum               int
 		sumInfo           InterfaceEntity.SumInfo
+		consulInfo        InterfaceEntity.ConsulInfo
 	)
 	c.ShouldBind(&importServiceBody)
 	servicePort = importServiceBody.ServicePort
@@ -275,8 +296,14 @@ func ImportService(c *gin.Context) {
 		DingdingSecret:      importServiceBody.DingdingSecret,
 		DingdingList:        DingdingList,
 	}
-	fmt.Println(serviceInfo)
+	// fmt.Println(serviceInfo)
 	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
+	if err := DB.First(&consulInfo).Error; err != nil {
+	}
+	var consulInfoObj = structs.Map(consulInfo)
+	if consulInfoObj["ConsulAddress"].(string) != "" {
+		Pkg.RegisterServer(importServiceBody)
+	}
 	if err := DB.Create(&serviceInfo).Error; err != nil {
 		fmt.Println(err)
 		// tx.Rollback()
@@ -321,7 +348,7 @@ func EditService(c *gin.Context) {
 		// serviceInfo       InterfaceEntity.ServiceInfo = InterfaceEntity.ServiceInfo{}
 		DingdingList      string = ""
 		ServiceRules      string = ""
-		importServiceBody ImportServiceBody
+		importServiceBody InterfaceEntity.ImportServiceBody
 		// SingleProxyConfig map[string]interface{}      = map[string]interface{}{
 		// 	"serviceAddress": "",
 		// 	"servicePort":    80,

@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-09-06 15:56:41
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-21 16:56:58
+ * @LastEditTime: 2020-09-22 18:46:15
 -->
 <template>
   <el-form ref="ruleForm" :model="ruleForm" :rules='serviceRules' :inline="true" class='projectAdd' label-width='150px' label-position="left" :disabled="$route.query.type=='check'">
@@ -111,11 +111,11 @@
            <el-input type='text' v-model='ruleForm.useConsulCheckPath' placeholder="示例：'/checkHealth'"></el-input>
          </el-form-item>
        </el-col>
-       <el-col :span='8'>
+       <!-- <el-col :span='8'>
         <el-form-item label="健康检查端口">
            <el-input type='text' v-model="ruleForm.useConsulPort" placeholder="默认使用服务端口"></el-input>
          </el-form-item>
-       </el-col>
+       </el-col> -->
      </el-row>
      <el-row :gutter=20>
        <el-col :span="8">

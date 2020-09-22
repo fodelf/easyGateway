@@ -82,7 +82,7 @@ func ReverseProxy() gin.HandlerFunc {
 		)
 		urlPath := c.Request.URL.String()
 		var proxyObj = grepProxy(urlPath)
-		if proxyObj["flag"].(bool) || strings.HasPrefix(urlPath, "uiApi") {
+		if proxyObj["flag"].(bool) || strings.HasPrefix(urlPath, "/uiApi") {
 			c.Next()
 			return
 		}
@@ -151,7 +151,7 @@ func ReverseProxy() gin.HandlerFunc {
 		//范围：transport.RoundTrip发生的错误、以及ModifyResponse发生的错误
 		errFunc := func(w http.ResponseWriter, r *http.Request, err error) {
 			DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
-			if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), proxyObj["serverId"]).Update("fail", gorm.Expr("fail + ?", 1)).Error; err != nil {
+			if err := DB.Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), proxyObj["serverId"]).Update("fail", gorm.Expr("fail + ?", 1)).First(&chartInfo).Error; err != nil {
 			}
 			DB.Close()
 		}
@@ -159,7 +159,7 @@ func ReverseProxy() gin.HandlerFunc {
 		proxy.ServeHTTP(c.Writer, c.Request)
 		c.Next()
 		DBNext, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
-		if err := DBNext.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), proxyObj["serverId"]).Update("success", gorm.Expr("total - fail")).Error; err != nil {
+		if err := DBNext.Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), proxyObj["serverId"]).Update("success", gorm.Expr("total - fail")).First(&chartInfo).Error; err != nil {
 		}
 		DBNext.Close()
 	}

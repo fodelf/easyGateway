@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	proxy "gateway/middleware/proxy"
 	model "gateway/models"
 	InterfaceEntity "gateway/models/InterfaceEntity"
@@ -21,7 +20,7 @@ var DB *gorm.DB
 
 func ConnectDB() {
 	var err error
-	DB, err = gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	DB, err = gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
 
 	if err = DB.AutoMigrate(model.Models...).Error; nil != err {
 		log.Fatal("auto migrate tables failed: " + err.Error())
@@ -42,15 +41,6 @@ func ConnectDB() {
 			FailSum:    0,
 		}
 		DB.Create(&sumInfo)
-	} else {
-		var sumMap = structs.Map(sumInfo)
-		proxy.RequestSum = sumMap["RequestSum"].(int)
-		// proxy.CacheSumInfo = map[string]interface{}{
-		// 	"serverSum":  sumMap["ServerSum"].(int),
-		// 	"warningSum": sumMap["WarningSum"].(int),
-		// 	"requestSum": sumMap["RequestSum"].(int),
-		// 	"failSum":    sumMap["FailSum"].(int),
-		// }
 	}
 	if err := DB.Find(&consulInfo).Error; err != nil {
 		consulInfo = InterfaceEntity.ConsulInfo{
@@ -79,7 +69,7 @@ func ConnectDB() {
 		}
 		DB.Create(&sumInfo)
 	}
-	if err := DB.Find(&chartInfo).Error; err != nil {
+	if err := DB.Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), "all").First(&chartInfo).Error; err != nil {
 		chartInfo := InterfaceEntity.ChartInfo{
 			Time:     time.Now().Format("2006/01/02"),
 			Total:    0,
@@ -88,17 +78,21 @@ func ConnectDB() {
 			ServerId: "all",
 		}
 		DB.Create(&chartInfo)
-	} else {
-		if err := DB.Find(&chartInfo).Where("time = ?", time.Now().Format("2006/01/02")).Error; err != nil {
-		} else {
-			var chartInfoCache = structs.Map(chartInfo)
-			proxy.Total = chartInfoCache["Total"].(int)
-		}
 	}
 	if err := DB.Find(&serviceInfos).Error; err != nil {
 	} else {
 		for i := 0; i < len(serviceInfos); i++ {
 			var serviceInfo = structs.Map(serviceInfos[i])
+			if err := DB.Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), serviceInfo["ServerId"].(string)).First(&chartInfo).Error; err != nil {
+				chartInfo := InterfaceEntity.ChartInfo{
+					Time:     time.Now().Format("2006/01/02"),
+					Total:    0,
+					Success:  0,
+					Fail:     0,
+					ServerId: serviceInfo["ServerId"].(string),
+				}
+				DB.Create(&chartInfo)
+			}
 			var SingleProxyConfig map[string]interface{} = map[string]interface{}{
 				"serverId":       serviceInfo["ServerId"],
 				"serviceAddress": serviceInfo["ServiceAddress"],
@@ -107,7 +101,6 @@ func ConnectDB() {
 			}
 			var serviceRules = serviceInfo["ServiceRules"].(string)
 			var rules = strings.Split(serviceRules, ",")
-			fmt.Println(rules)
 			for i := 0; i < len(rules); i++ {
 				var ruleArray = strings.Split(rules[i], ";")
 				var rule = map[string]interface{}{

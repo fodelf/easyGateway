@@ -91,9 +91,13 @@ func GetCharts(c *gin.Context) {
 			timeList = append(timeList, time)
 		}
 		var dis = 7 - len(totalList)
+		fmt.Println(dis)
 		for k := 0; k < dis; k++ {
 			var nTime = time.Now()
-			var old = nTime.AddDate(0, 0, (k - dis - 1)).Format("2006/01/02")
+			if len(timeList) > 0 {
+				nTime, _ = time.ParseInLocation("2006/01/02", timeList[0], time.Local)
+			}
+			var old = nTime.AddDate(0, 0, (k - dis)).Format("2006/01/02")
 			tempTimeList = append(tempTimeList, old)
 			tempTotalList = append(tempTotalList, 0)
 			tempSuccessList = append(tempSuccessList, 0)
