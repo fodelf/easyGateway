@@ -42,6 +42,7 @@ require (
 	github.com/kataras/golog v0.1.2 // indirect
 	github.com/kataras/rizla v0.1.1 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
+	github.com/marlonfan/go-library v0.0.0-20180504100944-3ba7339839ad
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mattn/go-shellwords v1.0.10 // indirect
 	github.com/mattn/go-sqlite3 v1.14.2

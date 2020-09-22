@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"encoding/json"
 	"fmt"
 	InterfaceEntity "gateway/models/InterfaceEntity"
 	"log"
@@ -10,9 +11,40 @@ import (
 	// "github.com/CatchZeng/dingtalk"
 	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
+	"github.com/hashicorp/consul/api"
 	consulapi "github.com/hashicorp/consul/api"
+	"github.com/hashicorp/consul/api/watch"
+
+	// "github.com/hashicorp/consul/watch"
 	"github.com/jinzhu/gorm"
 )
+
+func ConsulKVTest() {
+	// 创建连接consul服务配置
+	config := consulapi.DefaultConfig()
+	config.Address = "172.16.242.129:8500"
+	client, err := consulapi.NewClient(config)
+	if err != nil {
+		log.Fatal("consul client error : ", err)
+	}
+
+	// KV, put值
+	values := "test"
+	key := "go-consul-test/172.16.242.129:8100"
+	client.KV().Put(&consulapi.KVPair{Key: key, Flags: 0, Value: []byte(values)}, nil)
+
+	// KV get值
+	data, _, _ := client.KV().Get(key, nil)
+	fmt.Println(string(data.Value))
+
+	// KV list
+	datas, _, _ := client.KV().List("go", nil)
+	for _, value := range datas {
+		fmt.Println(value)
+	}
+	keys, _, _ := client.KV().Keys("go", "", nil)
+	fmt.Println(keys)
+}
 
 // var Client consulapi
 
@@ -46,6 +78,27 @@ type ImportServiceBody struct {
 	DingdingAccessToken string                   `json:"dingdingAccessToken"`
 	DingdingSecret      string                   `json:"dingdingSecret"`
 	DingdingList        []string                 `json:"dingdingList"`
+}
+
+// 取消consul注册的服务
+func ConsulDeRegister(useConsulId string) {
+	var (
+		consulInfo InterfaceEntity.ConsulInfo
+	)
+	// 创建连接consul服务配置
+	DB, err := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc")
+	if err := DB.First(&consulInfo).Error; err != nil {
+	}
+	DB.Close()
+	var consulInfoObj = structs.Map(consulInfo)
+	config := consulapi.DefaultConfig()
+	port := strconv.Itoa(consulInfoObj["ConsulPort"].(int))
+	config.Address = consulInfoObj["ConsulAddress"].(string) + ":" + port
+	client, err := consulapi.NewClient(config)
+	if err != nil {
+		log.Fatal("consul client error : ", err)
+	}
+	client.Agent().ServiceDeregister(useConsulId)
 }
 
 // consul 服务注册
@@ -90,6 +143,23 @@ func RegisterServer(importServiceBody InterfaceEntity.ImportServiceBody) {
 	err = client.Agent().ServiceRegister(registration)
 	if err != nil {
 		log.Fatal("register server error : ", err)
+	}
+	watchConfig := make(map[string]interface{})
+
+	watchConfig["type"] = "service"
+	watchConfig["service"] = "test"
+	watchConfig["handler_type"] = "script"
+	watchPlan, _ := watch.Parse(watchConfig)
+	// util.CheckError(err)
+	watchPlan.Handler = func(lastIndex uint64, result interface{}) {
+		services := result.([]*api.ServiceEntry)
+		str, _ := json.Marshal(services)
+		// util.CheckError(err)
+		fmt.Println(string(str))
+		// fmt.Println(result)
+	}
+	if err := watchPlan.Run("127.0.0.1:8500"); err != nil {
+		log.Fatalf("start watch error, error message: %s", err.Error())
 	}
 	// KV get值
 	// data, _, _ := client.KV().Get("config", nil)

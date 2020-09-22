@@ -445,12 +445,19 @@ type DeleteServiceBody struct {
 func DeleteService(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
-		sumInfo InterfaceEntity.SumInfo
-		ser     DeleteServiceBody
+		sumInfo    InterfaceEntity.SumInfo
+		ser        DeleteServiceBody
+		consulInfo InterfaceEntity.ConsulInfo
 	)
 	c.ShouldBind(&ser)
 	// 数据物理删除
 	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
+	if err := DB.First(&consulInfo).Error; err != nil {
+	}
+	var consulInfoObj = structs.Map(consulInfo)
+	if consulInfoObj["ConsulAddress"].(string) != "" {
+		Pkg.ConsulDeRegister(ser.ServerId)
+	}
 	if err := DB.First(&sumInfo).Update("server_sum", gorm.Expr("server_sum - ?", 1)).Error; err != nil {
 	}
 	if err := DB.Where("server_id = ?", ser.ServerId).Delete(&InterfaceEntity.ServiceInfo{}).Error; err != nil {
