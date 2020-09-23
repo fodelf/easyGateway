@@ -50,7 +50,13 @@ func ConnectDB() {
 		}
 		DB.Create(&consulInfo)
 	} else {
-		go pkg.InitWatch()
+		if err := DB.First(&consulInfo).Error; err != nil {
+
+		} else {
+			if consulInfo.ConsulAddress != "" {
+				go pkg.InitWatch()
+			}
+		}
 	}
 	if err := DB.Find(&rabbitMQInfo).Error; err != nil {
 		rabbitMQInfo := InterfaceEntity.RabbitMQInfo{

@@ -15,7 +15,7 @@
     <el-row :gutter=20>
       <el-col :span='8'>
         <el-form-item label="服务名称" prop='serviceName'>
-          <el-input type='text' v-model="ruleForm.serviceName" placeholder="请输入英文字母"></el-input>
+          <el-input type='text' v-model="ruleForm.serviceName" placeholder="请输入英文或者数字"></el-input>
         </el-form-item>
       </el-col>
       <el-col :span='8'>
@@ -33,19 +33,19 @@
         </el-form-item>
       </el-col>
       <el-col :span='8'>
-        <el-form-item label="服务端口">
+        <el-form-item label="服务端口" prop='servicePort'>
             <el-input type='text'  v-model.number="ruleForm.servicePort" placeholder="示例：3000"></el-input>
         </el-form-item>
       </el-col>
     </el-row>
     <el-row :gutter=20>
        <el-col :span="8">
-         <el-form-item label="熔断">
+         <el-form-item label="熔断" prop='serviceBreak'>
            <el-input type='text' v-model='ruleForm.serviceBreak' placeholder="请求超时时间"></el-input>
          </el-form-item>
        </el-col>
        <el-col :span='8'>
-        <el-form-item label="限流">
+        <el-form-item label="限流" prop='serviceLimit'>
            <el-input type='text' v-model="ruleForm.serviceLimit" placeholder="请求次数限制"></el-input>
          </el-form-item>
        </el-col>
@@ -71,12 +71,12 @@
         </el-row>
         <el-row :gutter=20 style="padding-left: 10px;">
         <el-col :span='8'>
-          <el-form-item label="重写前缀">
+          <el-form-item label="重写前缀" :prop="'serviceRules.'+index+'.pathReWriteBefore'"  :rules="rules.pathReWriteBefore">
             <el-input type='text' v-model="item.pathReWriteBefore" placeholder="示例：/api"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span='8'>
-          <el-form-item label="重写地址">
+          <el-form-item label="重写地址" :prop="'serviceRules.'+index+'.pathReWriteUrl'"  :rules="rules.pathReWriteUrl">
             <el-input type='text' v-model="item.pathReWriteUrl" placeholder="示例：/api"></el-input>
           </el-form-item>
         </el-col>
@@ -96,19 +96,19 @@
     <el-row :gutter=20>
        <el-col :span="8">
          <el-form-item label="服务ID">
-           <el-input type='text' v-model='ruleForm.useConsulId' placeholder="请输入英文字母"></el-input>
+           <el-input type='text' v-model='ruleForm.useConsulId' placeholder="请输入英文或者数字"></el-input>
          </el-form-item>
        </el-col>
        <el-col :span='8'>
         <el-form-item label="服务标签">
-           <el-input type='text' v-model="ruleForm.useConsulTag" placeholder="请输入英文字母"></el-input>
+           <el-input type='text' v-model="ruleForm.useConsulTag" placeholder="请输入英文或者数字"></el-input>
          </el-form-item>
        </el-col>
      </el-row>
      <el-row :gutter=20>
        <el-col :span="8">
-         <el-form-item label="监控检查接口">
-           <el-input type='text' v-model='ruleForm.useConsulCheckPath' placeholder="示例：'/checkHealth'"></el-input>
+         <el-form-item label="监控检查接口" prop='useConsulCheckPath'>
+           <el-input type='text' v-model='ruleForm.useConsulCheckPath' placeholder="示例：/checkHealth"></el-input>
          </el-form-item>
        </el-col>
        <!-- <el-col :span='8'>
@@ -119,12 +119,12 @@
      </el-row>
      <el-row :gutter=20>
        <el-col :span="8">
-         <el-form-item label="健康检查间隔(秒)">
+         <el-form-item label="健康检查间隔(秒)" prop='useConsulInterval'>
            <el-input type='text' v-model='ruleForm.useConsulInterval' placeholder="默认10s"></el-input>
          </el-form-item>
        </el-col>
        <el-col :span='8'>
-        <el-form-item label="健康检查超时时间(秒)">
+        <el-form-item label="健康检查超时时间(秒)" prop='useConsulTimeout'>
            <el-input type='text' v-model="ruleForm.useConsulTimeout" placeholder="默认3s"></el-input>
          </el-form-item>
        </el-col>

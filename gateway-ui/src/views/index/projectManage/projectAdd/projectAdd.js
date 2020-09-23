@@ -19,8 +19,48 @@ export default {
       if (value === '') {
         callback(new Error('请输入服务名称'));
       } else {
-        if((/[^A-Za-z]/g).test(value)){
-          callback(new Error('只能输入英文字母'));
+        if((/[^\w\.\/]/g).test(value)){
+          callback(new Error('只能输入英文字母和数字'));
+        }
+        callback();
+      }
+    }
+    const validateAddress= (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入服务地址'));
+      } else {
+        if(!((/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/).test(value)||(/^(?=^.{3,255}$)(http(s)?:\/\/)?(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$/).test(value))){
+          callback(new Error('请输入正确的服务地址'));
+        }
+        callback();
+      }
+    }
+    const validatePort = (rule, value, callback) => {
+      if (value === '') {
+        callback();
+      } else {
+        if(!Number.isInteger(value*1)){
+          callback(new Error('只能输入整数'));
+        }
+        callback();
+      }
+    }
+    const validateBreak= (rule, value, callback) => {
+      if (value === '') {
+        callback();
+      } else {
+        if(isNaN(Number(value))){
+          callback(new Error('只能输入数字'));
+        }
+        callback();
+      }
+    }
+    const validateCheckPath = (rule, value, callback) => {
+      if (value === '') {
+        callback();
+      } else {
+        if(!(/^\/[0-9a-zA-Z]*$/).test(value)){
+          callback(new Error('路径格式不正确'));
         }
         callback();
       }
@@ -52,12 +92,42 @@ export default {
           { required: true, message: '请选择服务类型', trigger: 'blur' },
         ],
         serviceAddress:[
-          { required: true, message: '请输入服务地址', trigger: 'blur' },
+          { required: true,validator: validateAddress, trigger: 'blur' },
+        ],
+        servicePort:[
+          {validator: validatePort, trigger: 'blur'},
+        ],
+        serviceLimit:[
+          {validator: validatePort, trigger: 'blur'},
+        ],
+        serviceBreak:[
+          {validator: validateBreak, trigger: 'blur'},
+        ],
+        useConsulId:[
+          { validator: validateEn, trigger: 'blur' },
+        ],
+        useConsulTag:[
+          { validator: validateEn, trigger: 'blur' },
+        ],
+        useConsulCheckPath:[
+          { validator: validateCheckPath, trigger: 'blur' },
+        ],
+        useConsulInterval:[
+          { validator: validateBreak, trigger: 'blur' },
+        ],
+        useConsulTimeout:[
+          { validator: validateBreak, trigger: 'blur' },
         ]
       },
       rules:{
         apiUrl:[
-          { required: true, message: '请输入拦截地址', trigger: 'blur' },
+          { required: true, message: '请输入正确的拦截地址', validator: validateCheckPath, trigger: 'blur' },
+        ],
+        pathReWriteBefore:[
+          {validator: validateCheckPath, trigger: 'blur' },
+        ],
+        pathReWriteUrl:[
+          {validator: validateCheckPath, trigger: 'blur' },
         ]
       },
       inputVisible:false,
@@ -113,6 +183,13 @@ export default {
       })
     },
     saveRule() {
+      if(this.ruleForm.serviceRules.length == 0){
+        this.$message({
+          message: '拦截规则不能为空',
+          type: 'warning'
+        });
+        return
+      }
       this.$refs["ruleForm"].validate((valid) => {
         if (valid) {
           let params = JSON.parse(JSON.stringify(this.ruleForm))
@@ -139,11 +216,30 @@ export default {
       })
     },
     updateRule() {
-      let params = this.ruleForm
-      updateService(params).then(res=>{
-        this.$router.push({
-          name:'projectManage'
-        })
+      if(this.ruleForm.serviceRules.length == 0){
+        this.$message({
+          message: '拦截规则不能为空',
+          type: 'warning'
+        });
+        return
+      }
+      this.$refs["ruleForm"].validate((valid) => {
+        if (valid) {
+          let params = JSON.parse(JSON.stringify(this.ruleForm))
+          params.servicePort = params.servicePort*1
+          params.serviceLimit = params.serviceLimit*1
+          params.serviceBreak = params.serviceBreak*1
+          params.useConsulPort = params.useConsulPort*1
+          params.useConsulInterval = params.useConsulInterval*1
+          params.useConsulTimeout = params.useConsulTimeout*1
+          updateService(params).then(res=>{
+            this.$router.push({
+              name:'projectManage'
+            })
+          })
+        } else {
+          return false
+        }
       })
     }
   },

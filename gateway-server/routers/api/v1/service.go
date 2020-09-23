@@ -164,6 +164,10 @@ func GetServerDetail(c *gin.Context) {
 		if serviceInfoMap["UseConsulTimeout"] == 0 {
 			useConsulTimeout = ""
 		}
+		var dingdingList = []string{}
+		if serviceInfoMap["DingdingList"].(string) != "" {
+			dingdingList = strings.Split(serviceInfoMap["DingdingList"].(string), ",")
+		}
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
 			"serverId":            serviceInfoMap["ServerId"],
 			"serviceName":         serviceInfoMap["ServiceName"],
@@ -181,7 +185,7 @@ func GetServerDetail(c *gin.Context) {
 			"useConsulTimeout":    useConsulTimeout,
 			"dingdingAccessToken": serviceInfoMap["DingdingAccessToken"],
 			"dingdingSecret":      serviceInfoMap["DingdingSecret"],
-			"dingdingList":        strings.Split(serviceInfoMap["DingdingList"].(string), ","),
+			"dingdingList":        dingdingList,
 		})
 		DB.Close()
 	}
@@ -219,7 +223,7 @@ func ImportService(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
 		serviceInfoCount  InterfaceEntity.ServiceInfo
-		DingdingList      string
+		DingdingList      string                 = ""
 		ServiceRules      string                 = ""
 		deleteFlag        int                    = 0
 		SingleProxyConfig map[string]interface{} = map[string]interface{}{
@@ -256,7 +260,6 @@ func ImportService(c *gin.Context) {
 	for i := 0; i < len((dingdingList)); i++ {
 		var dingding = dingdingList[i]
 		if i == 0 {
-			DingdingList = dingding
 		} else {
 			DingdingList = DingdingList + "," + dingding
 		}
