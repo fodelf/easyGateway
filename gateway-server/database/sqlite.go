@@ -4,12 +4,12 @@ import (
 	proxy "gateway/middleware/proxy"
 	model "gateway/models"
 	InterfaceEntity "gateway/models/InterfaceEntity"
+	pkg "gateway/pkg/consul"
 	Utils "gateway/utils"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/fatih/structs"
 	"github.com/jinzhu/gorm"
 
 	// _ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -49,6 +49,8 @@ func ConnectDB() {
 			Type:          "consul",
 		}
 		DB.Create(&consulInfo)
+	} else {
+		go pkg.InitWatch()
 	}
 	if err := DB.Find(&rabbitMQInfo).Error; err != nil {
 		rabbitMQInfo := InterfaceEntity.RabbitMQInfo{
@@ -82,24 +84,24 @@ func ConnectDB() {
 	if err := DB.Find(&serviceInfos).Error; err != nil {
 	} else {
 		for i := 0; i < len(serviceInfos); i++ {
-			var serviceInfo = structs.Map(serviceInfos[i])
-			if err := DB.Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), serviceInfo["ServerId"].(string)).First(&chartInfo).Error; err != nil {
+			var serviceInfo = serviceInfos[i]
+			if err := DB.Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), serviceInfo.ServerId).First(&chartInfo).Error; err != nil {
 				chartInfo := InterfaceEntity.ChartInfo{
 					Time:     time.Now().Format("2006/01/02"),
 					Total:    0,
 					Success:  0,
 					Fail:     0,
-					ServerId: serviceInfo["ServerId"].(string),
+					ServerId: serviceInfo.ServerId,
 				}
 				DB.Create(&chartInfo)
 			}
 			var SingleProxyConfig map[string]interface{} = map[string]interface{}{
-				"serverId":       serviceInfo["ServerId"],
-				"serviceAddress": serviceInfo["ServiceAddress"],
-				"servicePort":    serviceInfo["ServicePort"],
+				"serverId":       serviceInfo.ServerId,
+				"serviceAddress": serviceInfo.ServiceAddress,
+				"servicePort":    serviceInfo.ServicePort,
 				"serviceRules":   []map[string]interface{}{},
 			}
-			var serviceRules = serviceInfo["ServiceRules"].(string)
+			var serviceRules = serviceInfo.ServiceRules
 			var rules = strings.Split(serviceRules, ",")
 			for i := 0; i < len(rules); i++ {
 				var ruleArray = strings.Split(rules[i], ";")

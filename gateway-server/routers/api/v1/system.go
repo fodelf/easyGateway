@@ -2,6 +2,7 @@ package v1
 
 import (
 	InterfaceEntity "gateway/models/InterfaceEntity"
+	pkg "gateway/pkg/consul"
 	"gateway/pkg/e"
 	"net/http"
 
@@ -45,6 +46,7 @@ func EditConsul(c *gin.Context) {
 		tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}
+	go pkg.InitWatch()
 }
 
 // @Tags  系统模块

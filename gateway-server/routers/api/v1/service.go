@@ -181,7 +181,7 @@ func GetServerDetail(c *gin.Context) {
 			"useConsulTimeout":    useConsulTimeout,
 			"dingdingAccessToken": serviceInfoMap["DingdingAccessToken"],
 			"dingdingSecret":      serviceInfoMap["DingdingSecret"],
-			"dingdingList":        serviceInfoMap["DingdingList"],
+			"dingdingList":        strings.Split(serviceInfoMap["DingdingList"].(string), ","),
 		})
 		DB.Close()
 	}
@@ -255,7 +255,11 @@ func ImportService(c *gin.Context) {
 	serviceRules = importServiceBody.ServiceRules
 	for i := 0; i < len((dingdingList)); i++ {
 		var dingding = dingdingList[i]
-		DingdingList = DingdingList + "," + dingding
+		if i == 0 {
+			DingdingList = dingding
+		} else {
+			DingdingList = DingdingList + "," + dingding
+		}
 	}
 	for i := 0; i < len((serviceRules)); i++ {
 		var service = serviceRules[i]
@@ -295,6 +299,7 @@ func ImportService(c *gin.Context) {
 		DingdingAccessToken: importServiceBody.DingdingAccessToken,
 		DingdingSecret:      importServiceBody.DingdingSecret,
 		DingdingList:        DingdingList,
+		WarnTime:            time.Now().Format("2006/01/02 15:04:05"),
 	}
 	// fmt.Println(serviceInfo)
 	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
@@ -371,7 +376,11 @@ func EditService(c *gin.Context) {
 	var dingdingList = importServiceBody.DingdingList
 	for i := 0; i < len((dingdingList)); i++ {
 		var dingding = dingdingList[i]
-		DingdingList = DingdingList + "," + dingding
+		if i == 0 {
+			DingdingList = dingding
+		} else {
+			DingdingList = DingdingList + "," + dingding
+		}
 	}
 	var serviceRules = importServiceBody.ServiceRules
 	for i := 0; i < len((serviceRules)); i++ {

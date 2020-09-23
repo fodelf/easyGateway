@@ -7,8 +7,10 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
-	// "github.com/CatchZeng/dingtalk"
+	"github.com/CatchZeng/dingtalk"
 	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/consul/api"
@@ -130,9 +132,9 @@ func RegisterServer(importServiceBody InterfaceEntity.ImportServiceBody) {
 	registration.Address = importServiceBody.ServiceAddress      // 服务 IP
 
 	// 健康检查 支持http及grpc 回调接口
-	checkPort := 3000
+
 	registration.Check = &consulapi.AgentServiceCheck{ // 健康检查
-		HTTP:     fmt.Sprintf("http://%s:%d%s", registration.Address, checkPort, importServiceBody.UseConsulCheckPath),
+		HTTP:     fmt.Sprintf("http://%s:%d%s", registration.Address, importServiceBody.ServicePort, importServiceBody.UseConsulCheckPath),
 		Timeout:  "3s",  // 超时时间
 		Interval: "30s", // 健康检查间隔
 		// DeregisterCriticalServiceAfter: "30s", //check失败后30秒删除本服务，注销时间，相当于过期时间
@@ -144,23 +146,7 @@ func RegisterServer(importServiceBody InterfaceEntity.ImportServiceBody) {
 	if err != nil {
 		log.Fatal("register server error : ", err)
 	}
-	watchConfig := make(map[string]interface{})
 
-	watchConfig["type"] = "service"
-	watchConfig["service"] = "test"
-	watchConfig["handler_type"] = "script"
-	watchPlan, _ := watch.Parse(watchConfig)
-	// util.CheckError(err)
-	watchPlan.Handler = func(lastIndex uint64, result interface{}) {
-		services := result.([]*api.ServiceEntry)
-		str, _ := json.Marshal(services)
-		// util.CheckError(err)
-		fmt.Println(string(str))
-		// fmt.Println(result)
-	}
-	if err := watchPlan.Run("127.0.0.1:8500"); err != nil {
-		log.Fatalf("start watch error, error message: %s", err.Error())
-	}
 	// KV get值
 	// data, _, _ := client.KV().Get("config", nil)
 	// fmt.Println(string(data.Value))
@@ -177,3 +163,92 @@ func RegisterServer(importServiceBody InterfaceEntity.ImportServiceBody) {
 func heathCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, "ok")
 }
+
+// 初始化监听
+func InitWatch() {
+	var (
+		consulInfo  InterfaceEntity.ConsulInfo
+		serviceInfo InterfaceEntity.ServiceInfo
+		sumInfo     InterfaceEntity.SumInfo
+	)
+	// 创建连接consul服务配置
+	DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
+	if err := DB.First(&consulInfo).Error; err != nil {
+		return
+	}
+
+	var consulInfoObj = structs.Map(consulInfo)
+	port := strconv.Itoa(consulInfoObj["ConsulPort"].(int))
+	var address string = consulInfoObj["ConsulAddress"].(string) + ":" + port
+	fmt.Println(address)
+	watchConfig := make(map[string]interface{})
+
+	watchConfig["type"] = "checks"
+	// watchConfig["service"] = "test"
+	watchConfig["handler_type"] = "script"
+	watchPlan, _ := watch.Parse(watchConfig)
+	// util.CheckError(err)
+	watchPlan.Handler = func(lastIndex uint64, result interface{}) {
+		// services := result.([]*api.ServiceEntry)
+		services := result.([]*api.HealthCheck)
+		str, _ := json.Marshal(services)
+		var arr []map[string]interface{}
+		json.Unmarshal([]byte(str), &arr)
+		for i := 0; i < len(arr); i++ {
+			var child = arr[i]
+			if child["ServiceID"] != "" {
+				if err := DB.Where("use_consul_id = ?", child["ServiceID"]).First(&serviceInfo).Error; err != nil {
+				} else {
+					if child["Status"] != "passing" {
+						fmt.Println(serviceInfo.ServiceName + "异常")
+						if len(serviceInfo.DingdingList) > 0 && serviceInfo.DingdingAccessToken != "" && serviceInfo.DingdingSecret != "" {
+							var DingdingList = strings.Split(serviceInfo.DingdingList, ",")
+							dingding := dingtalk.NewClient(serviceInfo.DingdingAccessToken, serviceInfo.DingdingSecret)
+							msg := dingtalk.NewTextMessage().SetContent(serviceInfo.ServiceName+"服务异常，请关注").SetAt(DingdingList, false)
+							dingding.Send(msg)
+						}
+						var min int64
+						t1, err := time.ParseInLocation("2006/01/02 15:04:05", serviceInfo.WarnTime, time.Local)
+						t2, err := time.ParseInLocation("2006/01/02 15:04:05", time.Now().Format("2006/01/02 15:04:05"), time.Local)
+						if err == nil && t1.Before(t2) {
+							diff := t2.Unix() - t1.Unix() //
+							min = diff / 60
+						}
+						// 十分钟告警异常
+						if min > int64(10) {
+							warning := InterfaceEntity.WarningInfo{
+								Time:   time.Now().Format("2006/01/02 15:04:05"),
+								System: serviceInfo.ServiceName,
+							}
+							DB.Create(&warning)
+						}
+						var update InterfaceEntity.ServiceInfo
+						if err := DB.Model(&update).Where("use_consul_id = ?", child["ServiceID"]).Update("warn_time", time.Now().Format("2006/01/02 15:04:05")).Error; err != nil {
+						}
+						if err := DB.First(&sumInfo).Update("warning_sum", gorm.Expr("warning_sum + ?", 1)).Error; err != nil {
+						}
+					} else {
+						fmt.Println(serviceInfo.ServiceName + "正常了")
+					}
+				}
+			}
+		}
+	}
+	if err := watchPlan.Run(address); err != nil {
+		log.Fatalf("start watch error, error message: %s", err.Error())
+	}
+	DB.Close()
+}
+
+// func mustParse(t *testing.T, q string) *watch.Plan {
+// 	t.Helper()
+// 	var params map[string]interface{}
+// 	if err := json.Unmarshal([]byte(q), &params); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	plan, err := watch.Parse(params)
+// 	if err != nil {
+// 		t.Fatalf("err: %v", err)
+// 	}
+// 	return plan
+// }

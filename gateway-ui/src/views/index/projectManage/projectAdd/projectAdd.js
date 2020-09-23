@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-09-06 15:56:49
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-22 18:48:24
+ * @LastEditTime: 2020-09-23 19:46:51
  */
 import {
   getServiceType,
@@ -70,6 +70,9 @@ export default {
   },
   methods:{
     handleClose(tag) {
+      if(this.$route.query.type =='check'){
+        return
+      }
       this.ruleForm.dingdingList.splice(this.ruleForm.dingdingList.indexOf(tag), 1);
     },
     showInput() {

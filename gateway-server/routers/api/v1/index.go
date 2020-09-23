@@ -91,7 +91,6 @@ func GetCharts(c *gin.Context) {
 			timeList = append(timeList, time)
 		}
 		var dis = 7 - len(totalList)
-		fmt.Println(dis)
 		for k := 0; k < dis; k++ {
 			var nTime = time.Now()
 			if len(timeList) > 0 {
