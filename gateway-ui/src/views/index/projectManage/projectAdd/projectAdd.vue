@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-09-06 15:56:41
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-22 18:46:15
+ * @LastEditTime: 2020-09-24 09:13:09
 -->
 <template>
   <el-form ref="ruleForm" :model="ruleForm" :rules='serviceRules' :inline="true" class='projectAdd' label-width='150px' label-position="left" :disabled="$route.query.type=='check'">
@@ -41,7 +41,8 @@
     <el-row :gutter=20>
        <el-col :span="8">
          <el-form-item label="熔断" prop='serviceBreak'>
-           <el-input type='text' v-model='ruleForm.serviceBreak' placeholder="请求超时时间"></el-input>
+           <!-- <el-input type='text' v-model='ruleForm.serviceBreak' placeholder="请求超时时间"></el-input> -->
+           <el-input type='text' v-model='ruleForm.serviceBreak' placeholder="请求错误百分百比例如25"></el-input>
          </el-form-item>
        </el-col>
        <el-col :span='8'>

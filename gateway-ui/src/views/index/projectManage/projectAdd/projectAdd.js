@@ -4,7 +4,7 @@
  * @Author: pym
  * @Date: 2020-09-06 15:56:49
  * @LastEditors: 吴文周
- * @LastEditTime: 2020-09-23 19:46:51
+ * @LastEditTime: 2020-09-24 09:14:42
  */
 import {
   getServiceType,
@@ -45,11 +45,24 @@ export default {
         callback();
       }
     }
-    const validateBreak= (rule, value, callback) => {
+    const validateBreak = (rule, value, callback) => {
       if (value === '') {
         callback();
       } else {
         if(isNaN(Number(value))){
+          callback(new Error('只能输入数字'));
+        }
+        callback();
+      }
+    }
+    const validateBreak1=(rule, value, callback) => {
+      if (value === '') {
+        callback();
+      } else {
+        if(isNaN(Number(value))){
+          if(value<0 ||value>100){
+            callback(new Error('只能输入100以内的数字'));
+          }
           callback(new Error('只能输入数字'));
         }
         callback();
@@ -101,7 +114,7 @@ export default {
           {validator: validatePort, trigger: 'blur'},
         ],
         serviceBreak:[
-          {validator: validateBreak, trigger: 'blur'},
+          {validator: validateBreak1, trigger: 'blur'},
         ],
         useConsulId:[
           { validator: validateEn, trigger: 'blur' },

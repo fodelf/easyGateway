@@ -12,8 +12,8 @@ import (
 	"time"
 
 	// "io/ioutil"
-
 	"github.com/EDDYCJY/go-gin-example/pkg/app"
+	"github.com/afex/hystrix-go/hystrix"
 	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -222,7 +222,6 @@ func GetServerDetail(c *gin.Context) {
 func ImportService(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var (
-		serviceInfoCount  InterfaceEntity.ServiceInfo
 		DingdingList      string                 = ""
 		ServiceRules      string                 = ""
 		deleteFlag        int                    = 0
@@ -244,9 +243,9 @@ func ImportService(c *gin.Context) {
 		dingdingList      []string
 		serviceRules      []map[string]interface{}
 		importServiceBody InterfaceEntity.ImportServiceBody
-		sum               int
-		sumInfo           InterfaceEntity.SumInfo
-		consulInfo        InterfaceEntity.ConsulInfo
+		// sum               int
+		sumInfo    InterfaceEntity.SumInfo
+		consulInfo InterfaceEntity.ConsulInfo
 	)
 	c.ShouldBind(&importServiceBody)
 	servicePort = importServiceBody.ServicePort
@@ -313,25 +312,40 @@ func ImportService(c *gin.Context) {
 		Pkg.RegisterServer(importServiceBody)
 	}
 	if err := DB.Create(&serviceInfo).Error; err != nil {
-		fmt.Println(err)
-		// tx.Rollback()
 		appG.Response(http.StatusOK, e.ERROR, map[string]interface{}{})
 	} else {
-		// tx.Close()
 		SingleProxyConfig["serviceAddress"] = importServiceBody.ServiceAddress
 		SingleProxyConfig["servicePort"] = servicePort
 		SingleProxyConfig["serverId"] = generateUUID
 		proxy.ProxyConfig = append(proxy.ProxyConfig, SingleProxyConfig)
-		// tx.Commit()
 		appG.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{})
 	}
-	if err := DB.Model(&serviceInfoCount).Count(&sum).Error; err != nil {
+	if err := DB.First(&sumInfo).Update("server_sum", gorm.Expr("server_sum + ?", 1)).Error; err != nil {
 	}
-	if err := DB.First(&sumInfo).Update("server_sum", sum).Error; err != nil {
-		// DB.Rollback()
-	} else {
-		// DB.Commit()
+	// 很奇怪
+	if serviceBreak > 0 && serviceLimit > 0 {
+		hystrix.ConfigureCommand(generateUUID, hystrix.CommandConfig{
+			//多长时间 超时
+			// Timeout: 5000,
+			//最大并发数
+			MaxConcurrentRequests: serviceLimit,
+			//错误百分比,错误率达到这个数值开启熔断
+			ErrorPercentThreshold: serviceBreak,
+			// //当熔断器被打开后，SleepWindow的时间就是控制过多久后去尝试服务是否可用了(毫秒)
+			// SleepWindow: 10,
+			// //最小请求数，只有到达这个数量后才判断是否开启熔断
+			// RequestVolumeThreshold: 10,
+		})
+	} else if serviceBreak > 0 && serviceLimit == 0 {
+		hystrix.ConfigureCommand(generateUUID, hystrix.CommandConfig{
+			ErrorPercentThreshold: serviceBreak,
+		})
+	} else if serviceBreak == 0 && serviceLimit > 0 {
+		hystrix.ConfigureCommand(generateUUID, hystrix.CommandConfig{
+			MaxConcurrentRequests: serviceLimit,
+		})
 	}
+
 	chartInfo := InterfaceEntity.ChartInfo{
 		Time:     time.Now().Format("2006/01/02"),
 		Total:    0,

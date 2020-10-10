@@ -9,6 +9,7 @@ require (
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
 	github.com/CloudyKit/jet v2.1.2+incompatible // indirect
 	github.com/EDDYCJY/go-gin-example v0.0.0-20200505102242-63963976dee0
+	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
 	github.com/agrison/go-tablib v0.0.0-20160310143025-4930582c22ee // indirect
 	github.com/agrison/mxj v0.0.0-20160310142625-1269f8afb3b4 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
@@ -55,6 +56,8 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/shopspring/decimal v1.2.0
+	github.com/smartystreets/goconvey v1.6.4
+	github.com/streadway/amqp v1.0.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.7
@@ -67,6 +70,7 @@ require (
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73 // indirect
 	golang.org/x/sys v0.0.0-20200905004654-be1d3432aa8f // indirect
 	golang.org/x/tools v0.0.0-20200904185747-39188db58858 // indirect
+	google.golang.org/appengine v1.6.3
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/flosch/pongo2.v3 v3.0.0-20141028000813-5e81b817a0c4 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
