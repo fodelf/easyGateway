@@ -6,8 +6,6 @@ import (
 
 	"errors"
 	"gateway/hystrix"
-	"gateway/models/InterfaceEntity"
-	"time"
 
 	// "io/ioutil"
 
@@ -17,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 )
 
 var (
@@ -193,11 +190,11 @@ func ReverseProxy() gin.HandlerFunc {
 			}
 			var proxyError error = nil
 			errFunc := func(w http.ResponseWriter, r *http.Request, err error) {
-				var chartInfo InterfaceEntity.ChartInfo
-				DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
-				if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), proxyObj["serverId"]).Update("fail", gorm.Expr("fail + ?", 1)).Error; err != nil {
-				}
-				DB.Close()
+				// var chartInfo InterfaceEntity.ChartInfo
+				// DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
+				// if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), proxyObj["serverId"]).Update("fail", gorm.Expr("fail + ?", 1)).Error; err != nil {
+				// }
+				// DB.Close()
 				proxyError = err
 			}
 			proxy := &httputil.ReverseProxy{Director: director, ErrorHandler: errFunc}

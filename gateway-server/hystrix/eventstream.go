@@ -76,7 +76,7 @@ func (sh *StreamHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 }
 
 func (sh *StreamHandler) loop() {
-	tick := time.Tick(1 * time.Second)
+	tick := time.Tick(10 * time.Second)
 	for {
 		select {
 		case <-tick:
@@ -199,7 +199,7 @@ func (sh *StreamHandler) writeToRequests(eventBytes []byte) error {
 	str2 := string(dataBytes)
 	var data map[string]interface{}
 	var dataString = strings.TrimPrefix(str2, "data:")
-	fmt.Println(dataString)
+	// fmt.Println(dataString)
 	if err := json.Unmarshal([]byte(dataString), &data); err == nil {
 		// fmt.Println("==============json str 转map=======================")
 		// var data = dat["data"].(map[string]interface{})
@@ -209,21 +209,29 @@ func (sh *StreamHandler) writeToRequests(eventBytes []byte) error {
 			sumInfo   InterfaceEntity.SumInfo
 			chartInfo InterfaceEntity.ChartInfo
 		)
-		fmt.Println("==============json str 转map=======================")
-		fmt.Println(data["type"])
-		if data["type"] == "HystrixCommand" {
+		// fmt.Println(data["requestCount"])
+		// fmt.Println(dataString)
+		// fmt.Println(data["requestCount"])
+		// fmt.Println(data["currentTime"])
+		// fmt.Println(currentTime())
+		if data["type"] == "HystrixCommand" && data["requestCount"].(float64) > 0 {
+			// fmt.Println(dataString)
 			var requestCount = data["requestCount"]
 			var errorCount = data["errorCount"]
-			fmt.Println(requestCount)
-			fmt.Println(errorCount)
+			fmt.Println("-----------------------------------------------------------------------------------------------------")
+			// fmt.Println(requestCount)
+			// fmt.Println(errorCount)
 			DB, _ := gorm.Open("sqlite3", "gateway.sqlite?cache=shared&mode=rwc&_journal_mode=WAL")
 			if err := DB.First(&sumInfo).Updates(map[string]interface{}{"request_sum": gorm.Expr("request_sum + ?", requestCount), "fail_sum": gorm.Expr("fail_sum + ?", errorCount)}).Error; err != nil {
 			}
-			if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), "all").Updates(map[string]interface{}{"total": gorm.Expr("total + ?", 1), "fail": gorm.Expr("fail + ?", errorCount)}).Error; err != nil {
+			if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), "all").Updates(map[string]interface{}{"total": gorm.Expr("total + ?", requestCount), "fail": gorm.Expr("fail + ?", errorCount), "success": gorm.Expr("total - fail")}).Error; err != nil {
 			}
-			if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), data["name"]).Updates(map[string]interface{}{"total": gorm.Expr("total + ?", 1), "fail": gorm.Expr("fail + ?", errorCount)}).Error; err != nil {
+			if err := DB.First(&chartInfo).Where("time = ? AND server_id = ?", time.Now().Format("2006/01/02"), data["name"]).Updates(map[string]interface{}{"total": gorm.Expr("total + ?", requestCount), "fail": gorm.Expr("fail + ?", errorCount), "success": gorm.Expr("total - fail")}).Error; err != nil {
 			}
 			DB.Close()
+			// go sh.loop()
+		} else {
+			// go sh.Stop()
 		}
 	}
 	// fmt.Println(str2)

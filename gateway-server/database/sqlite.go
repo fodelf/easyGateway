@@ -112,6 +112,7 @@ func ConnectDB() {
 					RequestVolumeThreshold: 1,
 				})
 			} else if serviceBreak > 0 && serviceLimit == 0 {
+				// fmt.Printf("11111")
 				hystrix.ConfigureCommand(generateUUID, hystrix.CommandConfig{
 					ErrorPercentThreshold:  serviceBreak,
 					RequestVolumeThreshold: 1000000000000,
